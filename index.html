@@ -486,9 +486,22 @@
   }
 
   /* ============ 건강검진 ============ */
+  /* 건강검진 탭만 1000px 컨테이너를 벗어나 화면 전체 폭을 쓴다 */
+  #panel-checkup:not(.hidden){
+    width: 96vw;
+    max-width: 1600px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
   #checkup-frame{
-    width:100%; min-height:85vh;
+    width:100%; min-height:88vh;
     border:1px solid var(--line); border-radius:var(--radius); background:#fff;
+  }
+
+  @media (max-width: 1040px){
+    /* 화면이 컨테이너보다 그리 넓지 않으면 무리하게 늘리지 않는다 */
+    #panel-checkup:not(.hidden){ width: 100%; left: 0; transform: none; }
   }
 
   /* ============ 직원 관리 ============ */
