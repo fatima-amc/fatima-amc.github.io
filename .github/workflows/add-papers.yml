@@ -1,0 +1,32 @@
+name: Add existing papers by PMID
+
+on:
+  workflow_dispatch:
+    inputs:
+      pmids:
+        description: "PMID 목록 (쉼표/공백/줄바꿈으로 구분, 예: 12345678, 23456789)"
+        required: true
+      category:
+        description: "분과 (예: 영상진단 / 외과 / 내과 / 종양 / 신경 / 심장 / 피부)"
+        required: true
+        default: "미분류"
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 의존성 설치
+        run: pip install -r scripts/requirements.txt
+
+      - name: PMID로 논문 추가
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PMIDS: ${{ github.event.inputs.pmids }}
+          CATEGORY: ${{ github.event.inputs.category }}
+        run: python scripts/add_existing_papers.py
