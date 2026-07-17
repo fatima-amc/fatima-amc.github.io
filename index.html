@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>최신 수의학 논문 · 내부 자료</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #10161c;
+    --surface: #19222b;
+    --surface-raised: #202b35;
+    --line: #2b3742;
+    --text: #e7edf2;
+    --text-muted: #8d9aa6;
+    --accent: #5ec8d8;
+    --accent-dim: #3a7f8c;
+    --amber: #e8a33d;
+    --danger: #d9695f;
+    --radius: 3px;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(94,200,216,0.06), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    color: var(--text);
+    font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  button, input { font-family: inherit; }
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 48px 24px 96px; }
+  .hidden{ display: none !important; }
+
+  #login-screen{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-card{
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+  }
+  .login-card .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .login-card h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    margin: 8px 0 20px;
+  }
+  .login-card input[type="password"]{
+    width: 100%;
+    padding: 11px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .login-card input:focus, button:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .login-card button{
+    width: 100%;
+    padding: 11px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .login-card button:disabled{ opacity: 0.6; cursor: default; }
+  .login-error{
+    color: var(--danger);
+    font-size: 13px;
+    margin: -4px 0 12px;
+    min-height: 16px;
+  }
+  .login-note{ color: var(--text-muted); font-size: 13px; margin: 0 0 18px; line-height:1.5; }
+  .login-hint{ color: var(--amber); font-size: 11.5px; margin: 16px 0 0; line-height:1.5; font-family:'IBM Plex Mono',monospace; }
+  .google-btn{
+    width: 100%;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding: 11px;
+    background: #fff;
+    color: #1f1f1f;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .google-btn:hover{ background: #f2f2f2; }
+  #access-denied-screen{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* ---------- 직원 관리 탭 ---------- */
+  .admin-add-row{ display:flex; gap:8px; margin-bottom:20px; }
+  .admin-add-row input{
+    flex:1; padding:9px 12px; background: var(--surface); border:1px solid var(--line);
+    border-radius: var(--radius); color: var(--text); font-size:14px;
+  }
+  .admin-add-row button{
+    background: var(--accent); color: var(--bg); border:none; font-weight:600;
+    font-size:13px; padding:9px 16px; border-radius:var(--radius); cursor:pointer; white-space:nowrap;
+  }
+  .staff-list{ display:flex; flex-direction:column; }
+  .staff-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 0; border-top:1px solid var(--line); font-size:14px;
+  }
+  .staff-row:last-child{ border-bottom:1px solid var(--line); }
+  .staff-row .email{ font-family:'IBM Plex Mono',monospace; font-size:13px; }
+  .staff-row .admin-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color: var(--amber);
+    border:1px solid rgba(232,163,61,0.4); border-radius:2px; padding:1px 6px; margin-left:8px;
+  }
+  .staff-row button{
+    background:none; border:1px solid var(--line); color: var(--danger);
+    font-family:'IBM Plex Mono',monospace; font-size:12px;
+    padding:5px 10px; border-radius:var(--radius); cursor:pointer;
+  }
+  .staff-row button:hover{ border-color: var(--danger); }
+
+  header.app-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{
+    content:''; width:6px; height:6px; border-radius:50%;
+    background: var(--amber); box-shadow: 0 0 6px 1px rgba(232,163,61,0.7);
+  }
+  h1{ font-family: 'Space Grotesk', sans-serif; font-weight:600; font-size: clamp(24px,4vw,34px); margin: 8px 0 4px; letter-spacing:-0.01em; }
+  .sub{ color: var(--text-muted); font-size: 14px; }
+  #logout-btn{
+    background: none; border: 1px solid var(--line); color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 7px 12px; border-radius: var(--radius); cursor: pointer; white-space: nowrap;
+  }
+  #logout-btn:hover{ color: var(--text); border-color: var(--accent-dim); }
+
+  .tabs{ display:flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .tab-btn{
+    background:none; border:none; color: var(--text-muted);
+    font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
+    padding: 10px 16px; cursor:pointer; border-bottom: 2px solid transparent; margin-bottom:-1px;
+  }
+  .tab-btn.active{ color: var(--accent); border-bottom-color: var(--accent); }
+
+  .filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  .filter-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:13px;
+    background: var(--surface); border:1px solid var(--line); color: var(--text-muted);
+    padding:7px 14px; border-radius:var(--radius); cursor:pointer;
+  }
+  .filter-btn:hover{ color: var(--text); border-color: var(--accent-dim); }
+  .filter-btn.active{ color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight:500; }
+
+  .filmstrip{ display:flex; flex-direction:column; }
+  .slide{ border-top:1px solid var(--line); padding:20px 0; }
+  .slide:last-child{ border-bottom:1px solid var(--line); }
+  .slide-top{ display:grid; grid-template-columns: 84px 1fr; gap: 0; }
+  .sprocket{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--text-muted); display:flex; flex-direction:column; gap:4px; padding-top:2px; }
+  .sprocket .cat-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background: var(--accent); vertical-align:middle; }
+  .slide h2{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; line-height:1.4; margin:0 0 8px; }
+  .slide h2 a{ text-decoration:none; }
+  .slide h2 a:hover{ color: var(--accent); }
+  .authors{ font-size:13.5px; color: var(--text-muted); margin-bottom:4px; }
+  .journal-line{ font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--accent-dim); }
+  .journal-line .date{ color: var(--text-muted); }
+  .source-tag{ font-family:'IBM Plex Mono',monospace; font-size:10px; color: var(--text-muted); border:1px solid var(--line); border-radius:2px; padding:1px 5px; margin-left:6px; }
+
+  .review-toggle{
+    margin-top:10px; margin-left:84px;
+    background:none; border:1px solid var(--line); color: var(--accent);
+    font-family:'IBM Plex Mono',monospace; font-size:12px;
+    padding:5px 10px; border-radius:var(--radius); cursor:pointer;
+  }
+  .review-panel{ margin-left:84px; margin-top:12px; background: var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; }
+  .review-item{ padding:8px 0; border-bottom: 1px dashed var(--line); font-size:13.5px; }
+  .review-item:last-child{ border-bottom:none; }
+  .review-item .rname{ color: var(--accent); font-weight:600; margin-right:6px; }
+  .review-item .rtime{ color: var(--text-muted); font-family:'IBM Plex Mono',monospace; font-size:11px; margin-left:6px; }
+  .review-form{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .review-form input, .review-form textarea{
+    background: var(--bg); border:1px solid var(--line); border-radius:var(--radius);
+    color: var(--text); padding:8px 10px; font-size:13.5px; resize: vertical;
+  }
+  .review-form button{
+    align-self:flex-start; background: var(--accent); color: var(--bg); border:none;
+    font-weight:600; font-size:13px; padding:7px 14px; border-radius:var(--radius); cursor:pointer;
+  }
+
+  .empty, .error{ font-family:'IBM Plex Mono',monospace; color: var(--text-muted); font-size:13px; padding:40px 0; border-top:1px dashed var(--line); }
+
+  .bw-bar{
+    display:flex; align-items:center; gap:10px; background: var(--surface);
+    border:1px solid var(--line); border-radius: var(--radius); padding:14px 18px; margin-bottom:20px;
+  }
+  .bw-bar label{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; }
+  .bw-bar input{ width:90px; padding:8px 10px; background: var(--bg); border:1px solid var(--line); border-radius:var(--radius); color: var(--text); font-size:15px; }
+  .warning-banner{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color: var(--amber);
+    border:1px solid rgba(232,163,61,0.4); background: rgba(232,163,61,0.08);
+    padding:10px 14px; border-radius:var(--radius); margin-bottom:24px;
+  }
+  .drug-group{ margin-bottom: 32px; }
+  .drug-group-title{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+  .drug-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
+  .drug-card{ background: var(--surface); border:1px solid var(--line); border-left-width:4px; border-radius: var(--radius); padding:14px 16px; }
+  .drug-card-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .drug-card-head .name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; }
+  .drug-card-head .badge{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color: var(--text-muted); text-align:right; max-width: 55%; }
+  .field-row{ display:flex; gap:8px; margin:6px 0; }
+  .field{ flex:1; }
+  .field label{ display:block; font-size:10.5px; color: var(--text-muted); font-family:'IBM Plex Mono',monospace; margin-bottom:3px; }
+  .field input{ width:100%; padding:6px 8px; background: var(--bg); border:1px solid var(--line); border-radius:2px; color: var(--text); font-size:13px; }
+  .drug-result{
+    margin-top:10px; font-size:12.5px; background: var(--bg); border:1px solid var(--line);
+    border-radius:2px; padding:8px 10px; line-height:1.6;
+  }
+  .drug-result b{ color: var(--accent); }
+  .drug-result .loading-line{ margin-top:4px; color: var(--text-muted); font-family:'IBM Plex Mono',monospace; font-size:11px; }
+
+  footer{ margin-top:56px; padding-top:20px; border-top:1px solid var(--line); font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--text-muted); }
+
+  @media (max-width: 560px){
+    .slide-top{ grid-template-columns: 1fr; }
+    .sprocket{ flex-direction:row; margin-bottom:6px; }
+    .review-toggle, .review-panel{ margin-left:0; }
+  }
+  @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+</style>
+</head>
+<body>
+
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="eyebrow">Internal Access</div>
+      <h1>병원 내부 자료</h1>
+      <p class="login-note">구글 계정으로 로그인하세요. 병원에서 미리 등록한 이메일만 접속할 수 있습니다.</p>
+      <div class="login-error" id="login-error"></div>
+      <button type="button" id="google-login-btn" class="google-btn">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86-2.36 0-4.35-1.6-5.06-3.74H.9v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.94 10.68A5.4 5.4 0 0 1 3.66 9c0-.58.1-1.15.28-1.68V4.99H.9A9 9 0 0 0 0 9c0 1.45.35 2.83.9 4.01l3.04-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .9 4.99l3.04 2.33C4.65 5.18 6.64 3.58 9 3.58z"/></svg>
+        구글 계정으로 로그인
+      </button>
+      <p class="login-hint">⚠ 카카오톡 등 앱 내장 브라우저에서는 구글 로그인이 차단될 수 있습니다. 안 되면 우측 상단 메뉴에서 "다른 브라우저로 열기"를 눌러주세요.</p>
+    </div>
+  </div>
+
+  <div id="access-denied-screen" class="hidden">
+    <div class="login-card">
+      <div class="eyebrow" style="color:var(--danger)">Access Denied</div>
+      <h1>접근 권한이 없습니다</h1>
+      <p class="login-note" id="denied-email"></p>
+      <p class="login-note">이 계정은 병원 접속 허용 목록에 등록되어 있지 않습니다. 관리자(원장님)에게 등록을 요청해주세요.</p>
+      <button type="button" id="denied-logout-btn" class="google-btn" style="background:var(--surface-raised); color:var(--text); border:1px solid var(--line)">다른 계정으로 로그인</button>
+    </div>
+  </div>
+
+  <div id="app" class="wrap hidden">
+    <header class="app-header">
+      <div>
+        <div class="eyebrow">Internal &middot; PubMed</div>
+        <h1>최신 수의학 논문</h1>
+        <p class="sub">병원 내부용 · 논문 스크랩 + 리뷰 + CRI 계산기</p>
+      </div>
+      <button id="logout-btn">로그아웃</button>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="papers">논문 목록</button>
+      <button class="tab-btn" data-tab="cri">CRI 계산기</button>
+      <button class="tab-btn" data-tab="checkup">건강검진</button>
+      <button class="tab-btn hidden" data-tab="admin" id="admin-tab-btn">직원 관리</button>
+    </nav>
+
+    <section id="panel-papers">
+      <nav class="filters" id="filters" aria-label="분과 필터"></nav>
+      <div class="filmstrip" id="filmstrip"><div class="empty">불러오는 중…</div></div>
+    </section>
+
+    <section id="panel-cri" class="hidden">
+      <div class="bw-bar">
+        <label for="bw-input">체중</label>
+        <input type="number" id="bw-input" value="10" min="0" step="0.1">
+        <span style="color:var(--text-muted); font-size:13px;">kg</span>
+      </div>
+      <div class="warning-banner">⚠ 약물 농도(mg/ml 등)는 병원 보유 약물 라벨에 맞게 직접 수정한 뒤 사용하세요. 이 계산기는 참고용이며, 최종 투여량은 반드시 담당 수의사가 확인해야 합니다.</div>
+      <div id="cri-groups"></div>
+    </section>
+
+    <section id="panel-checkup" class="hidden">
+      <div id="checkup-status" class="empty">불러오는 중…</div>
+      <iframe id="checkup-frame" class="hidden"
+        sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+        style="width:100%; min-height:85vh; border:1px solid var(--line); border-radius:var(--radius); background:#fff;"></iframe>
+    </section>
+
+    <section id="panel-admin" class="hidden">
+      <p class="sub" style="margin-bottom:16px;">여기서 추가한 이메일로 구글 로그인한 직원만 이 사이트에 접속할 수 있습니다.</p>
+      <form class="admin-add-row" id="admin-add-form">
+        <input type="email" id="admin-add-email" placeholder="직원 구글 이메일 (예: name@gmail.com)" required>
+        <button type="submit">추가</button>
+      </form>
+      <div class="staff-list" id="staff-list"><div class="empty">불러오는 중…</div></div>
+    </section>
+
+    <footer>
+      데이터 출처: NCBI PubMed E-utilities · 이 페이지는 병원 내부 전용이며 로그인이 필요합니다.
+    </footer>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, query, orderBy, onSnapshot,
+    addDoc, getDoc, setDoc, deleteDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  import { firebaseConfig, ADMIN_EMAILS } from './firebase-config.js';
+  import { DRUG_GROUPS, computeCRI, fmt } from './cri-calculator.js';
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const loginScreen = document.getElementById('login-screen');
+  const deniedScreen = document.getElementById('access-denied-screen');
+  const appRoot = document.getElementById('app');
+  const loginError = document.getElementById('login-error');
+  const googleLoginBtn = document.getElementById('google-login-btn');
+
+  const googleProvider = new GoogleAuthProvider();
+
+  googleLoginBtn.addEventListener('click', async () => {
+    loginError.textContent = '';
+    googleLoginBtn.disabled = true;
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      if (err.code === 'auth/popup-blocked' || err.message?.includes('disallowed_useragent')) {
+        loginError.textContent = '이 브라우저에서는 구글 로그인이 차단되었습니다. 카카오톡 등 앱 내장 브라우저라면, 우측 상단 메뉴에서 "다른 브라우저로 열기"를 눌러 다시 시도해주세요.';
+      } else if (err.code !== 'auth/popup-closed-by-user') {
+        loginError.textContent = '로그인 중 오류가 발생했습니다: ' + err.message;
+      }
+    } finally {
+      googleLoginBtn.disabled = false;
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+  document.getElementById('denied-logout-btn').addEventListener('click', () => signOut(auth));
+
+  let unsubscribePapers = null;
+  let unsubscribeStaffList = null;
+
+  function showScreen(name){
+    // name: 'login' | 'denied' | 'app'
+    loginScreen.classList.toggle('hidden', name !== 'login');
+    deniedScreen.classList.toggle('hidden', name !== 'denied');
+    appRoot.classList.toggle('hidden', name !== 'app');
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      showScreen('login');
+      if (unsubscribePapers) { unsubscribePapers(); unsubscribePapers = null; }
+      if (unsubscribeStaffList) { unsubscribeStaffList(); unsubscribeStaffList = null; }
+      checkupLoaded = false;
+      const frame = document.getElementById('checkup-frame');
+      frame.srcdoc = '';
+      frame.classList.add('hidden');
+      document.getElementById('checkup-status').classList.remove('hidden');
+      document.getElementById('checkup-status').textContent = '불러오는 중…';
+      return;
+    }
+
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+    let allowed = isAdmin;
+
+    if (!allowed) {
+      try {
+        const snap = await getDoc(doc(db, 'allowlist', user.email));
+        allowed = snap.exists();
+      } catch (err) {
+        allowed = false;
+      }
+    }
+
+    if (!allowed) {
+      document.getElementById('denied-email').textContent = user.email + ' 로 로그인됨';
+      showScreen('denied');
+      return;
+    }
+
+    showScreen('app');
+    document.getElementById('admin-tab-btn').classList.toggle('hidden', !isAdmin);
+    if (!unsubscribePapers) unsubscribePapers = subscribeToPapers();
+    if (isAdmin && !unsubscribeStaffList) unsubscribeStaffList = subscribeToStaffList();
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.getElementById('panel-papers').classList.toggle('hidden', tab !== 'papers');
+      document.getElementById('panel-cri').classList.toggle('hidden', tab !== 'cri');
+      document.getElementById('panel-checkup').classList.toggle('hidden', tab !== 'checkup');
+      document.getElementById('panel-admin').classList.toggle('hidden', tab !== 'admin');
+      if (tab === 'checkup') loadCheckupTool();
+    });
+  });
+
+  const state = { papers: [], activeCategory: 'all' };
+
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  function parsePubDateKey(pubdate){
+    if(!pubdate) return 0;
+    const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const m = pubdate.match(/(\d{4})(?:\s+([A-Za-z]{3}))?(?:\s+(\d{1,2}))?/);
+    if(!m) return 0;
+    const year = parseInt(m[1], 10);
+    const month = m[2] && months[m[2]] !== undefined ? months[m[2]] : 0;
+    const day = m[3] ? parseInt(m[3], 10) : 1;
+    return new Date(year, month, day).getTime();
+  }
+
+  function subscribeToPapers(){
+    const papersQuery = query(collection(db, 'papers'), orderBy('fetched_at', 'desc'));
+    return onSnapshot(papersQuery, (snapshot) => {
+      state.papers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      state.papers.sort((a, b) => parsePubDateKey(b.pubdate) - parsePubDateKey(a.pubdate));
+      buildFilters();
+      renderPapers();
+    }, (err) => {
+      document.getElementById('filmstrip').innerHTML =
+        '<div class="error">불러오기 실패: ' + escapeHtml(err.message) + '</div>';
+    });
+  }
+
+  function buildFilters(){
+    const nav = document.getElementById('filters');
+    const categories = [...new Set(state.papers.map(p => p.category).filter(Boolean))];
+    const all = ['all', ...categories];
+    nav.innerHTML = all.map(cat => `
+      <button class="filter-btn ${cat === state.activeCategory ? 'active' : ''}" data-cat="${escapeHtml(cat)}">
+        ${cat === 'all' ? '전체' : escapeHtml(cat)}
+      </button>
+    `).join('');
+    nav.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeCategory = btn.dataset.cat;
+        nav.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+        renderPapers();
+      });
+    });
+  }
+
+  function renderPapers(){
+    const filmstrip = document.getElementById('filmstrip');
+    const list = state.activeCategory === 'all'
+      ? state.papers
+      : state.papers.filter(p => p.category === state.activeCategory);
+
+    if(list.length === 0){
+      filmstrip.innerHTML = '<div class="empty">해당 분과의 논문이 아직 없습니다.</div>';
+      return;
+    }
+
+    filmstrip.innerHTML = list.map(p => `
+      <article class="slide" data-pmid="${escapeHtml(p.id)}">
+        <div class="slide-top">
+          <div class="sprocket">
+            <span><span class="cat-dot"></span>${escapeHtml(p.category || '')}</span>
+            <span>PMID ${escapeHtml(p.id)}</span>
+          </div>
+          <div class="slide-body">
+            <h2><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a></h2>
+            <div class="authors">${escapeHtml((p.authors || []).join(', '))}${(p.authors||[]).length ? ' 외' : ''}</div>
+            <div class="journal-line">${escapeHtml(p.journal || '')} <span class="date">· ${escapeHtml(p.pubdate || '')}</span>${p.source === 'manual' ? '<span class="source-tag">수동 추가</span>' : ''}</div>
+          </div>
+        </div>
+        <button class="review-toggle" data-pmid="${escapeHtml(p.id)}">리뷰 보기 / 남기기</button>
+        <div class="review-panel hidden" data-panel-for="${escapeHtml(p.id)}"></div>
+      </article>
+    `).join('');
+
+    filmstrip.querySelectorAll('.review-toggle').forEach(btn => {
+      btn.addEventListener('click', () => toggleReviewPanel(btn.dataset.pmid));
+    });
+  }
+
+  const reviewUnsubscribers = new Map();
+
+  function toggleReviewPanel(pmid){
+    const panel = document.querySelector('.review-panel[data-panel-for="' + pmid + '"]');
+    if(!panel) return;
+    const isHidden = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', !isHidden);
+    if(isHidden && !reviewUnsubscribers.has(pmid)){
+      const commentsQuery = query(collection(db, 'papers', pmid, 'comments'), orderBy('created_at', 'asc'));
+      const unsub = onSnapshot(commentsQuery, (snapshot) => {
+        renderReviewPanel(pmid, snapshot.docs.map(d => d.data()));
+      });
+      reviewUnsubscribers.set(pmid, unsub);
+    }
+  }
+
+  function renderReviewPanel(pmid, comments){
+    const panel = document.querySelector('.review-panel[data-panel-for="' + pmid + '"]');
+    if(!panel) return;
+    const list = comments.length
+      ? comments.map(c => `
+          <div class="review-item">
+            <span class="rname">${escapeHtml(c.name)}</span>${escapeHtml(c.text)}
+            <span class="rtime">${c.created_at?.toDate ? c.created_at.toDate().toLocaleString('ko-KR') : ''}</span>
+          </div>
+        `).join('')
+      : '<div class="review-item" style="color:var(--text-muted)">아직 리뷰가 없습니다.</div>';
+
+    panel.innerHTML = `
+      ${list}
+      <form class="review-form" data-pmid="${pmid}">
+        <input type="text" name="name" placeholder="이름" required maxlength="30">
+        <textarea name="text" placeholder="이 논문에 대한 의견을 남겨보세요" rows="2" required maxlength="2000"></textarea>
+        <button type="submit">리뷰 등록</button>
+      </form>
+    `;
+
+    panel.querySelector('.review-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const name = form.name.value.trim();
+      const text = form.text.value.trim();
+      if(!name || !text) return;
+      form.querySelector('button').disabled = true;
+      try{
+        await addDoc(collection(db, 'papers', pmid, 'comments'), {
+          name, text, created_at: serverTimestamp()
+        });
+        form.text.value = '';
+      } catch(err){
+        alert('등록 실패: ' + err.message);
+      } finally {
+        form.querySelector('button').disabled = false;
+      }
+    });
+  }
+
+  // ---------------- 건강검진 도구 (Firestore에 저장된 HTML을 iframe으로 렌더링) ----------------
+  let checkupLoaded = false;
+
+  async function loadCheckupTool(){
+    if (checkupLoaded) return;
+    const statusEl = document.getElementById('checkup-status');
+    const frame = document.getElementById('checkup-frame');
+    try{
+      const snap = await getDoc(doc(db, 'tools', 'checkup'));
+      if (!snap.exists()){
+        statusEl.textContent = '아직 등록된 건강검진 도구가 없습니다.';
+        return;
+      }
+      frame.srcdoc = snap.data().html;
+      frame.classList.remove('hidden');
+      statusEl.classList.add('hidden');
+      checkupLoaded = true;
+    } catch(err){
+      statusEl.textContent = '불러오기 실패: ' + err.message;
+    }
+  }
+
+  // ---------------- 직원 관리(허용 이메일) ----------------
+  function subscribeToStaffList(){
+    const staffQuery = query(collection(db, 'allowlist'), orderBy('addedAt', 'desc'));
+    return onSnapshot(staffQuery, (snapshot) => {
+      renderStaffList(snapshot.docs.map(d => d.id));
+    }, (err) => {
+      document.getElementById('staff-list').innerHTML =
+        '<div class="error">불러오기 실패: ' + escapeHtml(err.message) + '</div>';
+    });
+  }
+
+  function renderStaffList(emails){
+    const listEl = document.getElementById('staff-list');
+    if(emails.length === 0){
+      listEl.innerHTML = '<div class="empty">아직 추가된 직원 이메일이 없습니다.</div>';
+      return;
+    }
+    listEl.innerHTML = emails.map(email => `
+      <div class="staff-row">
+        <span class="email">${escapeHtml(email)}${ADMIN_EMAILS.includes(email) ? '<span class="admin-tag">관리자</span>' : ''}</span>
+        <button data-email="${escapeHtml(email)}">삭제</button>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('button[data-email]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm(btn.dataset.email + ' 을(를) 접근 목록에서 삭제할까요?')) return;
+        btn.disabled = true;
+        try{
+          await deleteDoc(doc(db, 'allowlist', btn.dataset.email));
+        } catch(err){
+          alert('삭제 실패: ' + err.message);
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  document.getElementById('admin-add-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('admin-add-email');
+    const email = input.value.trim().toLowerCase();
+    if(!email) return;
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    try{
+      await setDoc(doc(db, 'allowlist', email), {
+        addedAt: serverTimestamp(),
+        addedBy: auth.currentUser?.email || '',
+      });
+      input.value = '';
+    } catch(err){
+      alert('추가 실패: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function renderCRI(){
+    const bwInput = document.getElementById('bw-input');
+    const container = document.getElementById('cri-groups');
+
+    function draw(){
+      const bw = parseFloat(bwInput.value) || 0;
+      container.innerHTML = DRUG_GROUPS.map(group => `
+        <div class="drug-group">
+          <div class="drug-group-title" style="color:${group.accent}">${escapeHtml(group.label)}</div>
+          <div class="drug-grid">
+            ${group.drugs.map(drug => drugCardHtml(drug, group.accent)).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      DRUG_GROUPS.flatMap(g => g.drugs).forEach(drug => {
+        const card = container.querySelector('.drug-card[data-drug="' + drug.id + '"]');
+        if(!card) return;
+        const inputs = card.querySelectorAll('input');
+        const recalc = () => updateDrugResult(drug, card, bw);
+        inputs.forEach(inp => inp.addEventListener('input', recalc));
+        recalc();
+      });
+    }
+
+    bwInput.addEventListener('input', draw);
+    draw();
+  }
+
+  function drugCardHtml(drug, accent){
+    if(drug.type === 'bicarbonate'){
+      return `
+        <div class="drug-card" data-drug="${drug.id}" style="border-left-color:${accent}">
+          <div class="drug-card-head">
+            <span class="name">${escapeHtml(drug.name)}</span>
+            <span class="badge">${escapeHtml(drug.badge)}</span>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>농도 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
+            <div class="field"><label>BE (음수 입력)</label><input type="number" data-role="be" value="${drug.defaultBE}" step="any"></div>
+          </div>
+          <div class="drug-result" data-role="result"></div>
+        </div>`;
+    }
+    if(drug.type === 'targetConc'){
+      return `
+        <div class="drug-card" data-drug="${drug.id}" style="border-left-color:${accent}">
+          <div class="drug-card-head">
+            <span class="name">${escapeHtml(drug.name)}</span>
+            <span class="badge">${escapeHtml(drug.badge)}</span>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>${escapeHtml(drug.doseLabel)}</label><input type="number" data-role="dose" value="${drug.defaultDose}" step="any"></div>
+            <div class="field"><label>수액 총량 (ml)</label><input type="number" data-role="volume" value="${drug.defaultVolume}" step="any"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>농도 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
+            <div class="field"><label>투여 속도 (ml/hr)</label><input type="number" data-role="rate" value="${drug.defaultRate}" step="any"></div>
+          </div>
+          <div class="drug-result" data-role="result"></div>
+        </div>`;
+    }
+    return `
+      <div class="drug-card" data-drug="${drug.id}" style="border-left-color:${accent}">
+        <div class="drug-card-head">
+          <span class="name">${escapeHtml(drug.name)}</span>
+          <span class="badge">${escapeHtml(drug.badge)}</span>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>농도 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>${escapeHtml(drug.doseLabel)}</label><input type="number" data-role="dose" value="${drug.defaultDose}" step="any"></div>
+          <div class="field"><label>수액 총량 (ml)</label><input type="number" data-role="volume" value="${drug.defaultVolume}" step="any"></div>
+          <div class="field"><label>CRI 속도 (ml/hr)</label><input type="number" data-role="rate" value="${drug.defaultRate}" step="any"></div>
+        </div>
+        <div class="drug-result" data-role="result"></div>
+      </div>`;
+  }
+
+  function updateDrugResult(drug, card, bw){
+    const val = (role) => parseFloat(card.querySelector('[data-role="' + role + '"]')?.value) || 0;
+    const resultEl = card.querySelector('[data-role="result"]');
+
+    if(drug.type === 'bicarbonate'){
+      const r = computeCRI(drug, { conc: val('conc'), be: val('be'), bw });
+      resultEl.innerHTML = '총 요구량 <b>' + fmt(r.fullVolume) + ' ml</b> → 실제 투여 <b>' + fmt(r.recommendedLow) + '~' + fmt(r.recommendedHigh) + ' ml</b>을 1~4시간에 걸쳐 공급';
+      return;
+    }
+
+    const r = computeCRI(drug, { conc: val('conc'), dose: val('dose'), volume: val('volume'), rate: val('rate'), bw });
+    let html = '수액 <b>' + fmt(r.diluentVolume) + ' ml</b>에 ' + escapeHtml(drug.name) + ' <b>' + fmt(r.drugVolume) + ' ml</b>을 넣고 <b>' + fmt(r.rate ?? val('rate')) + ' ml/hr</b>로 투여';
+    if(r.loading){
+      html += '<div class="loading-line">Loading: ' + drug.loading.low + '~' + drug.loading.high + ' ' + drug.loading.unit + ' → ' + fmt(r.loading.low) + '~' + fmt(r.loading.high) + ' ml IV</div>';
+    }
+    resultEl.innerHTML = html;
+  }
+
+  renderCRI();
+</script>
+</body>
+</html>
