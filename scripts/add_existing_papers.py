@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 기존에 알고 있던 논문들을 PMID 목록으로 한번에 추가한다.
+추가된 논문은 사이트의 "스터디" 탭(study_papers 컬렉션)에 표시된다.
 
 사용법 (로컬):
   PMIDS="12345678,23456789" CATEGORY="영상진단" \
@@ -73,7 +74,7 @@ def main() -> None:
         return
 
     db = init_firestore()
-    papers_ref = db.collection("papers")
+    papers_ref = db.collection("study_papers")  # 수동 추가 논문은 "스터디" 탭(study_papers)에 들어간다
 
     added, failed = 0, []
     for i in range(0, len(pmids), BATCH_SIZE):
