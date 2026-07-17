@@ -1,0 +1,25 @@
+name: Update veterinary papers
+
+on:
+  schedule:
+    # 매일 UTC 21:00 = 한국시간(KST) 06:00
+    - cron: "0 21 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 의존성 설치
+        run: pip install -r scripts/requirements.txt
+
+      - name: 논문 수집 및 Firestore 저장
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python scripts/fetch_papers.py
