@@ -147,49 +147,6 @@ export const DRUG_GROUPS = [
     ],
   },
   {
-    id: "tlk",
-    label: "무통주사 TLK (Tramadol · Lidocaine · Ketamine)",
-    accent: "#3E8E6E",
-    drugs: [
-      {
-        id: "tlk-tramadol",
-        name: "Tramadol (TLK)",
-        type: "perHr_mg",
-        badge: "1.3 mg/kg/hr",
-        defaultConc: 50,
-        concLabel: "mg/ml",
-        defaultDose: 1.3,
-        doseLabel: "용량 (mg/kg/hr)",
-        defaultVolume: 50,
-        defaultRate: 5,
-      },
-      {
-        id: "tlk-lidocaine",
-        name: "Lidocaine (TLK)",
-        type: "perHr_mg",
-        badge: "1.5 mg/kg/hr",
-        defaultConc: 20,
-        concLabel: "mg/ml",
-        defaultDose: 1.5,
-        doseLabel: "용량 (mg/kg/hr)",
-        defaultVolume: 50,
-        defaultRate: 5,
-      },
-      {
-        id: "tlk-ketamine",
-        name: "Ketamine (TLK)",
-        type: "perHr_mg",
-        badge: "0.6 mg/kg/hr",
-        defaultConc: 50,
-        concLabel: "mg/ml",
-        defaultDose: 0.6,
-        doseLabel: "용량 (mg/kg/hr)",
-        defaultVolume: 50,
-        defaultRate: 5,
-      },
-    ],
-  },
-  {
     id: "others",
     label: "기타 (Others)",
     accent: "#6B7A78",
@@ -356,4 +313,22 @@ export function computeEmergency(row, { dose, bw, bagSize, fluidRate }) {
     return (dose * bw * hours) / row.potencyPerMl;
   }
   return 0;
+}
+
+/* ============================================================
+   무통주사 TLK — 응급약물과 동일한 표 형식으로 표시
+   ml = 용량(mg/kg/hr) × 체중 × (Bag ÷ Rate 시간) ÷ 역가(mg/ml)
+============================================================ */
+export const TLK_ROWS = [
+  { id: "tlk-tramadol", name: "Tramadol", dose: 1.3, doseUnit: "mg/kg/hr",
+    potencyPerMl: 50, potencyLabel: "50 mg/ml" },
+  { id: "tlk-lidocaine", name: "Lidocaine", dose: 1.5, doseUnit: "mg/kg/hr",
+    potencyPerMl: 20, potencyLabel: "20 mg/ml" },
+  { id: "tlk-ketamine", name: "Ketamine", dose: 0.6, doseUnit: "mg/kg/hr",
+    potencyPerMl: 50, potencyLabel: "50 mg/ml" },
+];
+
+export function computeTLK(row, { dose, bw, bagSize, fluidRate }) {
+  const hours = fluidRate > 0 ? bagSize / fluidRate : 0;
+  return (dose * bw * hours) / row.potencyPerMl;
 }
