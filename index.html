@@ -1174,7 +1174,10 @@
           </div>
           <div class="field-row">
             <div class="field"><label>역가 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
-            <div class="field"><label>BE (음수 입력)</label><input type="number" data-role="be" value="${drug.defaultBE}" step="any"></div>
+            <div class="field"><label>측정 HCO₃⁻ (mmol/L)</label><input type="number" data-role="hco3" value="${drug.defaultHCO3}" step="any"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>BE (문헌 참고용, 음수)</label><input type="number" data-role="be" value="${drug.defaultBE}" step="any"></div>
           </div>
           <div class="drug-result" data-role="result"></div>
         </div>`;
@@ -1220,8 +1223,11 @@
     const resultEl = card.querySelector('[data-role="result"]');
 
     if(drug.type === 'bicarbonate'){
-      const r = computeCRI(drug, { conc: val('conc'), be: val('be'), bw });
-      resultEl.innerHTML = '총 요구량 <b>' + fmt(r.fullVolume) + ' ml</b> → 실제 투여 <b>' + fmt(r.recommendedLow) + '~' + fmt(r.recommendedHigh) + ' ml</b>을 1~4시간에 걸쳐 공급';
+      const r = computeCRI(drug, { conc: val('conc'), hco3: val('hco3'), be: val('be'), bw });
+      resultEl.innerHTML =
+        '<b>본원 기준</b> — 총 요구량 ' + fmt(r.fatimaVolume) + ' ml (' + fmt(r.fatimaMeq) + ' mEq)'
+        + ' → 실제 투여 <b>' + fmt(r.recommendedLow) + '~' + fmt(r.recommendedHigh) + ' ml</b>을 1~4시간에 걸쳐 공급'
+        + '<div class="loading-line">참고(문헌 BE×0.3): ' + fmt(r.litVolume) + ' ml (' + fmt(r.litMeq) + ' mEq) · 몸무게×0.5×(15−HCO₃⁻), pH 7.1 이하일 때만 적용</div>';
       return;
     }
 
