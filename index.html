@@ -271,7 +271,66 @@
     padding:10px 14px; border-radius:var(--radius); margin-bottom:30px;
     font-family:'IBM Plex Mono',monospace; line-height: 1.6;
   }
+  /* ---- 응급약물 테이블 ---- */
   .drug-group{ margin-bottom: 40px; }
+  .em-toolbar{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    background: var(--card); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 12px 16px; margin-bottom: 12px;
+  }
+  .em-global{ display:flex; align-items:center; gap:8px; }
+  .em-global label{ font-size:12px; font-weight:600; color: var(--ink-soft); }
+  .em-global span{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--ink-muted); }
+  .em-global input{
+    width: 76px; padding: 7px 9px;
+    background: #FBF3CE; border:1px solid #E3D48A; border-radius: 2px;
+    color: var(--ink); font-size:14px; font-weight:600;
+    font-family:'IBM Plex Mono',monospace; text-align: right;
+  }
+  .em-note-global{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color: var(--ink-muted); }
+  .em-table{
+    background: var(--card); border:1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .em-row{
+    display:grid;
+    grid-template-columns: 130px 150px 120px 90px 1fr;
+    gap: 12px; align-items:center;
+    padding: 9px 14px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 12.5px;
+  }
+  .em-row:first-child{ border-top:none; }
+  .em-row.em-head{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.08em;
+    text-transform: uppercase; color: var(--ink-muted);
+    background: var(--paper);
+  }
+  .em-row .em-name{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:13.5px; }
+  .em-row .em-dose{ display:flex; align-items:center; gap:6px; }
+  .em-row .em-dose input{
+    width: 68px; padding: 5px 7px;
+    background: #FCEBD9; border:1px solid #E8C79E; border-radius: 2px;
+    color: var(--ink); font-size:13px; font-weight:600;
+    font-family:'IBM Plex Mono',monospace; text-align: right;
+  }
+  .em-row .em-dose .u{ font-family:'IBM Plex Mono',monospace; font-size:10px; color: var(--ink-muted); }
+  .em-row .em-result{
+    font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600;
+    color: #23663F; background: #E4F2E4; border:1px solid #BFDCBF;
+    border-radius: 2px; padding: 4px 8px; text-align: right; white-space: nowrap;
+  }
+  .em-row .em-result .u{ font-size:10px; font-weight:400; color:#4E7D5D; margin-left:3px; }
+  .em-row .em-potency{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--ink-soft); }
+  .em-row .em-info{ color: var(--ink-muted); font-size:11.5px; line-height:1.5; }
+  .em-row .em-info .range{ color: var(--ink-soft); display:block; }
+  @media (max-width: 760px){
+    .em-row{ grid-template-columns: 1fr 1fr; }
+    .em-row.em-head{ display:none; }
+    .em-row .em-info{ grid-column: 1 / -1; }
+  }
+
+
   .drug-group-title{
     display:flex; align-items:baseline; gap:10px;
     font-family:'Noto Serif KR',serif; font-size:16.5px; font-weight:700;
@@ -501,7 +560,21 @@
         <input type="number" id="bw-input" value="10" min="0" step="0.1">
         <span class="unit">kg</span>
       </div>
-      <div class="warning-banner">⚠ 약물 농도(mg/ml 등)는 병원 보유 약물 라벨에 맞게 직접 수정한 뒤 사용하세요. 이 계산기는 참고용이며, 최종 투여량은 반드시 담당 수의사가 확인해야 합니다.</div>
+      <div class="warning-banner">⚠ 역가(mg/ml 등)는 병원 보유 약물 라벨에 맞게 확인 후 사용하세요. 이 계산기는 참고용이며, 최종 투여량은 반드시 담당 수의사가 확인해야 합니다.</div>
+
+      <div class="drug-group">
+        <div class="drug-group-title" style="color: var(--coral-deep)">
+          응급약물 (Emergency Drugs)
+          <span class="count">HOSPITAL PROTOCOL</span>
+        </div>
+        <div class="em-toolbar">
+          <div class="em-global"><label for="em-bag">IV Bag size</label><input type="number" id="em-bag" value="60" min="0" step="any"><span>ml</span></div>
+          <div class="em-global"><label for="em-rate">Fluid rate</label><input type="number" id="em-rate" value="1" min="0" step="any"><span>ml/hr</span></div>
+          <span class="em-note-global">체중은 위 "환자 체중" 입력값을 그대로 사용합니다 · 색이 있는 칸만 수정 가능</span>
+        </div>
+        <div class="em-table" id="em-table"></div>
+      </div>
+
       <div id="cri-groups"></div>
     </section>
 
@@ -559,7 +632,7 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   import { firebaseConfig, ADMIN_EMAILS } from './firebase-config.js';
-  import { DRUG_GROUPS, computeCRI, fmt } from './cri-calculator.js';
+  import { DRUG_GROUPS, computeCRI, fmt, EMERGENCY_ROWS, EMERGENCY_DEFAULTS, computeEmergency } from './cri-calculator.js';
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -1011,6 +1084,56 @@
   function renderCRI(){
     const bwInput = document.getElementById('bw-input');
     const container = document.getElementById('cri-groups');
+    const emTable = document.getElementById('em-table');
+    const emBag = document.getElementById('em-bag');
+    const emRate = document.getElementById('em-rate');
+    const emDoses = {}; // 사용자가 수정한 응급약물 용량 유지
+    EMERGENCY_ROWS.forEach(r => { emDoses[r.id] = r.dose; });
+
+    function drawEmergency(){
+      const bw = parseFloat(bwInput.value) || 0;
+      const bagSize = parseFloat(emBag.value) || 0;
+      const fluidRate = parseFloat(emRate.value) || 0;
+
+      emTable.innerHTML = `
+        <div class="em-row em-head">
+          <span>약물이름</span><span>용량 설정</span><span>약물용량</span><span>역가</span><span>용량 범위 · 비고</span>
+        </div>
+      ` + EMERGENCY_ROWS.map(row => {
+        const ml = computeEmergency(row, { dose: emDoses[row.id], bw, bagSize, fluidRate });
+        return `
+        <div class="em-row" data-em="${row.id}">
+          <span class="em-name">${escapeHtml(row.name)}</span>
+          <span class="em-dose">
+            <input type="number" value="${emDoses[row.id]}" step="any" data-role="em-dose">
+            <span class="u">${escapeHtml(row.doseUnit)}</span>
+          </span>
+          <span class="em-result">${fmt(ml, 4)}<span class="u">ml</span></span>
+          <span class="em-potency">${escapeHtml(row.potencyLabel)}</span>
+          <span class="em-info"><span class="range">${escapeHtml(row.range)}</span>${escapeHtml(row.note)}</span>
+        </div>`;
+      }).join('');
+
+      emTable.querySelectorAll('.em-row[data-em]').forEach(rowEl => {
+        const id = rowEl.dataset.em;
+        const row = EMERGENCY_ROWS.find(r => r.id === id);
+        const input = rowEl.querySelector('[data-role="em-dose"]');
+        input.addEventListener('input', () => {
+          emDoses[id] = parseFloat(input.value) || 0;
+          const bw2 = parseFloat(bwInput.value) || 0;
+          const ml2 = computeEmergency(row, {
+            dose: emDoses[id],
+            bw: bw2,
+            bagSize: parseFloat(emBag.value) || 0,
+            fluidRate: parseFloat(emRate.value) || 0,
+          });
+          rowEl.querySelector('.em-result').innerHTML = fmt(ml2, 4) + '<span class="u">ml</span>';
+        });
+      });
+    }
+
+    emBag.addEventListener('input', drawEmergency);
+    emRate.addEventListener('input', drawEmergency);
 
     function draw(){
       const bw = parseFloat(bwInput.value) || 0;
@@ -1036,8 +1159,9 @@
       });
     }
 
-    bwInput.addEventListener('input', draw);
+    bwInput.addEventListener('input', () => { draw(); drawEmergency(); });
     draw();
+    drawEmergency();
   }
 
   function drugCardHtml(drug, accent){
@@ -1049,7 +1173,7 @@
             <span class="badge">${escapeHtml(drug.badge)}</span>
           </div>
           <div class="field-row">
-            <div class="field"><label>농도 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
+            <div class="field"><label>역가 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
             <div class="field"><label>BE (음수 입력)</label><input type="number" data-role="be" value="${drug.defaultBE}" step="any"></div>
           </div>
           <div class="drug-result" data-role="result"></div>
@@ -1067,7 +1191,7 @@
             <div class="field"><label>수액 총량 (ml)</label><input type="number" data-role="volume" value="${drug.defaultVolume}" step="any"></div>
           </div>
           <div class="field-row">
-            <div class="field"><label>농도 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
+            <div class="field"><label>역가 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
             <div class="field"><label>투여 속도 (ml/hr)</label><input type="number" data-role="rate" value="${drug.defaultRate}" step="any"></div>
           </div>
           <div class="drug-result" data-role="result"></div>
@@ -1080,7 +1204,7 @@
           <span class="badge">${escapeHtml(drug.badge)}</span>
         </div>
         <div class="field-row">
-          <div class="field"><label>농도 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
+          <div class="field"><label>역가 (${drug.concLabel})</label><input type="number" data-role="conc" value="${drug.defaultConc}" step="any"></div>
         </div>
         <div class="field-row">
           <div class="field"><label>${escapeHtml(drug.doseLabel)}</label><input type="number" data-role="dose" value="${drug.defaultDose}" step="any"></div>
