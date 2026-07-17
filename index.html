@@ -575,6 +575,14 @@
         <div class="em-table" id="em-table"></div>
       </div>
 
+      <div class="drug-group">
+        <div class="drug-group-title" style="color: #3E8E6E">
+          무통주사 TLK (Tramadol · Lidocaine · Ketamine)
+          <span class="count">HOSPITAL PROTOCOL</span>
+        </div>
+        <div class="em-table" id="tlk-table"></div>
+      </div>
+
       <div id="cri-groups"></div>
     </section>
 
@@ -632,7 +640,7 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   import { firebaseConfig, ADMIN_EMAILS } from './firebase-config.js';
-  import { DRUG_GROUPS, computeCRI, fmt, EMERGENCY_ROWS, EMERGENCY_DEFAULTS, computeEmergency } from './cri-calculator.js';
+  import { DRUG_GROUPS, computeCRI, fmt, EMERGENCY_ROWS, EMERGENCY_DEFAULTS, computeEmergency, TLK_ROWS, computeTLK } from './cri-calculator.js';
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -1135,6 +1143,55 @@
     emBag.addEventListener('input', drawEmergency);
     emRate.addEventListener('input', drawEmergency);
 
+    // ---- 무통주사 TLK (응급약물과 동일한 표 형식) ----
+    const tlkTable = document.getElementById('tlk-table');
+    const tlkDoses = {};
+    TLK_ROWS.forEach(r => { tlkDoses[r.id] = r.dose; });
+
+    function drawTLK(){
+      const bw = parseFloat(bwInput.value) || 0;
+      const bagSize = parseFloat(emBag.value) || 0;
+      const fluidRate = parseFloat(emRate.value) || 0;
+
+      tlkTable.innerHTML = `
+        <div class="em-row em-head">
+          <span>약물이름</span><span>용량 설정</span><span>계산</span><span>역가</span><span></span>
+        </div>
+      ` + TLK_ROWS.map(row => {
+        const ml = computeTLK(row, { dose: tlkDoses[row.id], bw, bagSize, fluidRate });
+        return `
+        <div class="em-row" data-tlk="${row.id}">
+          <span class="em-name">${escapeHtml(row.name)}</span>
+          <span class="em-dose">
+            <input type="number" value="${tlkDoses[row.id]}" step="any" data-role="tlk-dose">
+            <span class="u">${escapeHtml(row.doseUnit)}</span>
+          </span>
+          <span class="em-result">${fmt(ml, 2)}<span class="u">ml</span></span>
+          <span class="em-potency">${escapeHtml(row.potencyLabel)}</span>
+          <span class="em-info"></span>
+        </div>`;
+      }).join('');
+
+      tlkTable.querySelectorAll('.em-row[data-tlk]').forEach(rowEl => {
+        const id = rowEl.dataset.tlk;
+        const row = TLK_ROWS.find(r => r.id === id);
+        const input = rowEl.querySelector('[data-role="tlk-dose"]');
+        input.addEventListener('input', () => {
+          tlkDoses[id] = parseFloat(input.value) || 0;
+          const ml2 = computeTLK(row, {
+            dose: tlkDoses[id],
+            bw: parseFloat(bwInput.value) || 0,
+            bagSize: parseFloat(emBag.value) || 0,
+            fluidRate: parseFloat(emRate.value) || 0,
+          });
+          rowEl.querySelector('.em-result').innerHTML = fmt(ml2, 2) + '<span class="u">ml</span>';
+        });
+      });
+    }
+
+    emBag.addEventListener('input', drawTLK);
+    emRate.addEventListener('input', drawTLK);
+
     function draw(){
       const bw = parseFloat(bwInput.value) || 0;
       container.innerHTML = DRUG_GROUPS.map(group => `
@@ -1159,9 +1216,10 @@
       });
     }
 
-    bwInput.addEventListener('input', () => { draw(); drawEmergency(); });
+    bwInput.addEventListener('input', () => { draw(); drawEmergency(); drawTLK(); });
     draw();
     drawEmergency();
+    drawTLK();
   }
 
   function drugCardHtml(drug, accent){
