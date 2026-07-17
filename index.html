@@ -3,270 +3,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>최신 수의학 논문 · 내부 자료</title>
+<title>파티마 수의학 아카이브 · FATIMA CLINICAL HUB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #10161c;
-    --surface: #19222b;
-    --surface-raised: #202b35;
-    --line: #2b3742;
-    --text: #e7edf2;
-    --text-muted: #8d9aa6;
-    --accent: #5ec8d8;
-    --accent-dim: #3a7f8c;
-    --amber: #e8a33d;
-    --danger: #d9695f;
-    --radius: 3px;
+    --paper: #F7F5F0;
+    --card: #FFFFFF;
+    --ink: #21302F;
+    --ink-soft: #48605E;
+    --ink-muted: #7E8E8C;
+    --line: #DFDACC;
+    --line-soft: #EAE6DB;
+    --mint: #40A195;
+    --mint-deep: #2A7C71;
+    --mint-tint: #EAF4F2;
+    --coral: #E4685C;
+    --coral-deep: #C24E43;
+    --coral-tint: #FBEFED;
+    --amber: #B8862F;
+    --amber-tint: #F8F1E2;
+    --radius: 4px;
   }
   * { box-sizing: border-box; }
-  html { color-scheme: dark; }
+  html { color-scheme: light; }
   body{
     margin:0;
-    background: var(--bg);
-    background-image:
-      radial-gradient(ellipse at top left, rgba(94,200,216,0.06), transparent 55%),
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
-    color: var(--text);
+    background: var(--paper);
+    color: var(--ink);
     font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
-    line-height: 1.5;
+    line-height: 1.55;
     min-height: 100vh;
   }
   a { color: inherit; }
-  button, input { font-family: inherit; }
-  .wrap{ max-width: 980px; margin: 0 auto; padding: 48px 24px 96px; }
+  button, input, textarea { font-family: inherit; }
+  .wrap{ max-width: 1000px; margin: 0 auto; padding: 0 24px 96px; }
   .hidden{ display: none !important; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
 
-  #login-screen{
+  /* ============ 로그인 / 접근거부 ============ */
+  #login-screen, #access-denied-screen{
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     padding: 24px;
   }
   .login-card{
-    width: 100%;
-    max-width: 360px;
-    background: var(--surface);
+    width: 100%; max-width: 400px;
+    background: var(--card);
     border: 1px solid var(--line);
+    border-top: 3px solid var(--mint);
     border-radius: var(--radius);
-    padding: 32px 28px;
+    padding: 36px 32px;
+    text-align: center;
   }
-  .login-card .eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  .login-card .brand-mono{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 11px; letter-spacing: 0.22em;
+    color: var(--mint-deep); text-transform: uppercase;
   }
   .login-card h1{
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 22px;
-    margin: 8px 0 20px;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: 26px;
+    margin: 10px 0 6px;
+    letter-spacing: 0.01em;
   }
-  .login-card input[type="password"]{
-    width: 100%;
-    padding: 11px 12px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-size: 14px;
-    margin-bottom: 12px;
+  .login-card .masthead-rule{
+    border: none; border-top: 1px solid var(--ink);
+    margin: 14px auto 4px; width: 64px;
   }
-  .login-card input:focus, button:focus-visible{
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-  }
-  .login-card button{
-    width: 100%;
-    padding: 11px;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  .login-card button:disabled{ opacity: 0.6; cursor: default; }
-  .login-error{
-    color: var(--danger);
-    font-size: 13px;
-    margin: -4px 0 12px;
-    min-height: 16px;
-  }
-  .login-note{ color: var(--text-muted); font-size: 13px; margin: 0 0 18px; line-height:1.5; }
-  .login-hint{ color: var(--amber); font-size: 11.5px; margin: 16px 0 0; line-height:1.5; font-family:'IBM Plex Mono',monospace; }
+  .login-card .masthead-rule + .masthead-rule{ margin-top: 2px; width: 40px; }
+  .login-note{ color: var(--ink-soft); font-size: 13.5px; margin: 16px 0 20px; line-height:1.6; }
+  .login-error{ color: var(--coral-deep); font-size: 13px; margin: -6px 0 12px; min-height: 16px; }
+  .login-hint{ color: var(--amber); font-size: 11.5px; margin: 18px 0 0; line-height:1.6; font-family:'IBM Plex Mono',monospace; text-align:left; }
   .google-btn{
     width: 100%;
     display:flex; align-items:center; justify-content:center; gap:10px;
-    padding: 11px;
-    background: #fff;
-    color: #1f1f1f;
+    padding: 12px;
+    background: var(--ink);
+    color: #fff;
     border: none;
     border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 600; font-size: 14px;
     cursor: pointer;
   }
-  .google-btn:hover{ background: #f2f2f2; }
-  #access-denied-screen{
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+  .google-btn:hover{ background: #33514E; }
+  .google-btn.secondary{ background: var(--card); color: var(--ink); border:1px solid var(--line); }
+  .google-btn.secondary:hover{ border-color: var(--ink-muted); }
+  input:focus, textarea:focus, button:focus-visible{
+    outline: 2px solid var(--mint);
+    outline-offset: 1px;
   }
 
-  /* ---------- 직원 관리 탭 ---------- */
-  .admin-add-row{ display:flex; gap:8px; margin-bottom:20px; }
+  /* ============ 마스트헤드 ============ */
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 14px 0 12px;
+    font-family:'IBM Plex Mono',monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-muted);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .topbar .dot{ display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--mint); margin-right:8px; vertical-align: 1px; }
+  #logout-btn{
+    background:none; border:1px solid var(--line); color: var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing: 0.06em;
+    padding: 6px 12px; border-radius: var(--radius); cursor:pointer; white-space:nowrap;
+  }
+  #logout-btn:hover{ border-color: var(--ink-muted); color: var(--ink); }
+
+  header.masthead{
+    text-align:center;
+    padding: 34px 0 0;
+  }
+  .masthead h1{
+    font-family:'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: clamp(30px, 5vw, 44px);
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+  .masthead .sub-en{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 12px; letter-spacing: 0.34em; text-transform: uppercase;
+    color: var(--mint-deep);
+    margin-top: 8px;
+  }
+  .masthead .rules{
+    margin: 22px 0 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    height: 5px;
+  }
+
+  nav.tabs{
+    display:flex; justify-content:center; flex-wrap:wrap;
+    gap: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 36px;
+  }
+  .tab-btn{
+    background:none; border:none;
+    color: var(--ink-soft);
+    font-family:'IBM Plex Sans KR',sans-serif; font-size:14px; font-weight:600;
+    padding: 8px 18px;
+    cursor:pointer;
+    position: relative;
+  }
+  .tab-btn + .tab-btn::before{
+    content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+    width:1px; height: 14px; background: var(--line);
+  }
+  .tab-btn:hover{ color: var(--ink); }
+  .tab-btn.active{ color: var(--mint-deep); }
+  .tab-btn.active::after{
+    content:''; position:absolute; left: 18px; right: 18px; bottom: -11px;
+    height: 2px; background: var(--mint);
+  }
+  .tab-btn.emerg.active{ color: var(--coral-deep); }
+  .tab-btn.emerg.active::after{ background: var(--coral); }
+
+  .section-title{
+    font-family:'Noto Serif KR', serif;
+    font-weight: 700; font-size: 19px;
+    margin: 0 0 4px;
+  }
+  .section-desc{ color: var(--ink-muted); font-size: 13px; margin: 0 0 22px; }
+
+  /* ============ 논문 목록 ============ */
+  .filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:26px; }
+  .filter-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+    background: var(--card); border:1px solid var(--line); color: var(--ink-soft);
+    padding:6px 14px; border-radius: 999px; cursor:pointer;
+  }
+  .filter-btn:hover{ border-color: var(--mint); color: var(--mint-deep); }
+  .filter-btn.active{ color: #fff; background: var(--mint-deep); border-color: var(--mint-deep); }
+
+  .paper-list{ display:flex; flex-direction:column; }
+  .paper{
+    border-top:1px solid var(--line);
+    padding: 22px 0;
+  }
+  .paper:last-child{ border-bottom:1px solid var(--line); }
+  .paper-meta{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color: var(--ink-muted); margin-bottom: 8px;
+  }
+  .paper-meta .cat{
+    color: var(--mint-deep);
+    border:1px solid var(--mint);
+    background: var(--mint-tint);
+    border-radius:2px; padding: 1px 7px;
+  }
+  .paper h2{
+    font-family:'Noto Serif KR', serif;
+    font-size:17.5px; font-weight:600; line-height:1.5; margin:0 0 8px;
+  }
+  .paper h2 a{ text-decoration:none; }
+  .paper h2 a:hover{ color: var(--mint-deep); text-decoration: underline; text-underline-offset: 3px; }
+  .authors{ font-size:13.5px; color: var(--ink-soft); margin-bottom:3px; }
+  .journal-line{ font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--ink-muted); }
+  .journal-line .jname{ color: var(--mint-deep); }
+
+  .review-toggle{
+    margin-top:12px;
+    background:none; border:1px solid var(--line); color: var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    padding:5px 12px; border-radius: var(--radius); cursor:pointer;
+  }
+  .review-toggle:hover{ border-color: var(--mint); color: var(--mint-deep); }
+  .review-panel{
+    margin-top:14px; background: var(--card);
+    border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;
+  }
+  .review-item{ padding:9px 0; border-bottom: 1px dashed var(--line-soft); font-size:13.5px; }
+  .review-item:last-of-type{ border-bottom:none; }
+  .review-item .rname{ color: var(--mint-deep); font-weight:600; margin-right:6px; }
+  .review-item .rtime{ color: var(--ink-muted); font-family:'IBM Plex Mono',monospace; font-size:11px; margin-left:6px; }
+  .review-form{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .review-form input, .review-form textarea{
+    background: var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    color: var(--ink); padding:9px 11px; font-size:13.5px; resize: vertical;
+  }
+  .review-form button{
+    align-self:flex-start; background: var(--mint-deep); color: #fff; border:none;
+    font-weight:600; font-size:13px; padding:8px 16px; border-radius:var(--radius); cursor:pointer;
+  }
+  .review-form button:hover{ background: var(--mint); }
+
+  .empty, .error{
+    font-family:'IBM Plex Mono',monospace; color: var(--ink-muted); font-size:13px;
+    padding:44px 0; text-align:center;
+    border:1px dashed var(--line); border-radius: var(--radius);
+    background: var(--card);
+  }
+  .error{ color: var(--coral-deep); }
+
+  /* ============ CRI 계산기 ============ */
+  .cri-toolbar{
+    position: sticky; top: 0; z-index: 20;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background: var(--card);
+    border:1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 16px -12px rgba(33,48,47,0.35);
+  }
+  .cri-toolbar .bw-label{
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:15px;
+  }
+  .cri-toolbar input{
+    width: 110px; padding: 10px 12px;
+    background: var(--paper);
+    border:1px solid var(--line); border-radius: var(--radius);
+    color: var(--ink); font-size: 20px; font-weight: 600;
+    font-family:'IBM Plex Mono',monospace;
+    text-align: right;
+  }
+  .cri-toolbar .unit{ color: var(--ink-muted); font-size:13px; font-family:'IBM Plex Mono',monospace; }
+  .warning-banner{
+    font-size:12.5px; color: var(--amber);
+    border:1px solid rgba(184,134,47,0.45); background: var(--amber-tint);
+    padding:10px 14px; border-radius:var(--radius); margin-bottom:30px;
+    font-family:'IBM Plex Mono',monospace; line-height: 1.6;
+  }
+  .drug-group{ margin-bottom: 40px; }
+  .drug-group-title{
+    display:flex; align-items:baseline; gap:10px;
+    font-family:'Noto Serif KR',serif; font-size:16.5px; font-weight:700;
+    margin-bottom:14px; padding-bottom:9px; border-bottom:2px solid currentColor;
+  }
+  .drug-group-title .count{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:400;
+    color: var(--ink-muted);
+  }
+  .drug-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap:16px; }
+  .drug-card{
+    background: var(--card); border:1px solid var(--line);
+    border-radius: var(--radius); padding:16px 18px 14px;
+    display:flex; flex-direction:column;
+  }
+  .drug-card-head{ margin-bottom:10px; }
+  .drug-card-head .name{
+    font-family:'Noto Serif KR',serif; font-weight:700; font-size:15.5px;
+    display:block;
+  }
+  .drug-card-head .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color: var(--ink-muted);
+    display:block; margin-top:3px; line-height:1.5;
+  }
+  .field-row{ display:flex; gap:8px; margin:5px 0; }
+  .field{ flex:1; }
+  .field label{ display:block; font-size:10.5px; color: var(--ink-muted); font-family:'IBM Plex Mono',monospace; margin-bottom:3px; }
+  .field input{
+    width:100%; padding:7px 9px;
+    background: var(--paper); border:1px solid var(--line); border-radius:2px;
+    color: var(--ink); font-size:13.5px; font-family:'IBM Plex Mono',monospace;
+  }
+  .drug-result{
+    margin-top:12px;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 11px;
+    font-size:12.5px; line-height:1.7;
+    color: var(--ink-soft);
+  }
+  .drug-result b{
+    color: var(--mint-deep);
+    font-size: 14.5px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .drug-result .loading-line{
+    margin-top:6px; color: var(--amber);
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+  }
+
+  /* ============ 응급 프로토콜 ============ */
+  .proto-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .proto-add-btn{
+    background: var(--coral-deep); color:#fff; border:none;
+    font-weight:600; font-size:13px; padding:9px 16px;
+    border-radius: var(--radius); cursor:pointer; white-space:nowrap;
+  }
+  .proto-add-btn:hover{ background: var(--coral); }
+  .proto-form{
+    background: var(--card); border:1px solid var(--line); border-left: 3px solid var(--coral);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 22px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .proto-form input, .proto-form textarea{
+    background: var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    color: var(--ink); padding: 10px 12px; font-size: 14px; resize: vertical;
+  }
+  .proto-form input{ font-weight:600; }
+  .proto-form .proto-form-actions{ display:flex; gap:8px; }
+  .proto-form .proto-form-actions button{
+    border:none; border-radius: var(--radius); font-size:13px; font-weight:600;
+    padding: 8px 16px; cursor:pointer;
+  }
+  .proto-save-btn{ background: var(--coral-deep); color:#fff; }
+  .proto-save-btn:hover{ background: var(--coral); }
+  .proto-cancel-btn{ background: none; border:1px solid var(--line) !important; color: var(--ink-soft); }
+  .proto-list{ display:flex; flex-direction:column; gap:14px; }
+  .proto-card{
+    background: var(--card);
+    border:1px solid var(--line); border-left: 3px solid var(--coral);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .proto-card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .proto-card h3{
+    font-family:'Noto Serif KR',serif; font-weight:700; font-size:16.5px;
+    margin: 0 0 6px;
+  }
+  .proto-card .proto-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .proto-card .proto-actions button{
+    background:none; border:1px solid var(--line); color: var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+    padding:4px 10px; border-radius: var(--radius); cursor:pointer;
+  }
+  .proto-card .proto-actions button:hover{ border-color: var(--ink-muted); color: var(--ink); }
+  .proto-card .proto-actions button.del:hover{ border-color: var(--coral); color: var(--coral-deep); }
+  .proto-body{
+    white-space: pre-wrap;
+    font-size: 13.5px; line-height: 1.75;
+    color: var(--ink-soft);
+    margin: 4px 0 10px;
+  }
+  .proto-meta{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color: var(--ink-muted);
+    border-top: 1px dashed var(--line-soft); padding-top: 8px;
+  }
+
+  /* ============ 건강검진 ============ */
+  #checkup-frame{
+    width:100%; min-height:85vh;
+    border:1px solid var(--line); border-radius:var(--radius); background:#fff;
+  }
+
+  /* ============ 직원 관리 ============ */
+  .admin-add-row{ display:flex; gap:8px; margin-bottom:22px; }
   .admin-add-row input{
-    flex:1; padding:9px 12px; background: var(--surface); border:1px solid var(--line);
-    border-radius: var(--radius); color: var(--text); font-size:14px;
+    flex:1; padding:10px 12px; background: var(--card); border:1px solid var(--line);
+    border-radius: var(--radius); color: var(--ink); font-size:14px;
   }
   .admin-add-row button{
-    background: var(--accent); color: var(--bg); border:none; font-weight:600;
-    font-size:13px; padding:9px 16px; border-radius:var(--radius); cursor:pointer; white-space:nowrap;
+    background: var(--mint-deep); color: #fff; border:none; font-weight:600;
+    font-size:13px; padding:10px 18px; border-radius:var(--radius); cursor:pointer; white-space:nowrap;
   }
-  .staff-list{ display:flex; flex-direction:column; }
+  .admin-add-row button:hover{ background: var(--mint); }
+  .staff-list{ display:flex; flex-direction:column; background: var(--card); border:1px solid var(--line); border-radius: var(--radius); padding: 0 18px; }
   .staff-row{
     display:flex; justify-content:space-between; align-items:center;
-    padding:12px 0; border-top:1px solid var(--line); font-size:14px;
+    padding:13px 0; border-top:1px solid var(--line-soft); font-size:14px;
   }
-  .staff-row:last-child{ border-bottom:1px solid var(--line); }
+  .staff-row:first-child{ border-top:none; }
   .staff-row .email{ font-family:'IBM Plex Mono',monospace; font-size:13px; }
   .staff-row .admin-tag{
     font-family:'IBM Plex Mono',monospace; font-size:10px; color: var(--amber);
-    border:1px solid rgba(232,163,61,0.4); border-radius:2px; padding:1px 6px; margin-left:8px;
+    border:1px solid rgba(184,134,47,0.45); border-radius:2px; padding:1px 6px; margin-left:8px;
   }
   .staff-row button{
-    background:none; border:1px solid var(--line); color: var(--danger);
+    background:none; border:1px solid var(--line); color: var(--coral-deep);
     font-family:'IBM Plex Mono',monospace; font-size:12px;
     padding:5px 10px; border-radius:var(--radius); cursor:pointer;
   }
-  .staff-row button:hover{ border-color: var(--danger); }
+  .staff-row button:hover{ border-color: var(--coral); }
 
-  header.app-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 24px;
-    margin-bottom: 24px;
+  footer{
+    margin-top:64px; padding-top:18px; border-top:2px solid var(--ink);
+    display:flex; justify-content:space-between; gap: 16px; flex-wrap: wrap;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--ink-muted);
+    letter-spacing: 0.04em;
   }
-  .eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    color: var(--accent);
-    text-transform: uppercase;
-    display:flex; align-items:center; gap:8px;
-  }
-  .eyebrow::before{
-    content:''; width:6px; height:6px; border-radius:50%;
-    background: var(--amber); box-shadow: 0 0 6px 1px rgba(232,163,61,0.7);
-  }
-  h1{ font-family: 'Space Grotesk', sans-serif; font-weight:600; font-size: clamp(24px,4vw,34px); margin: 8px 0 4px; letter-spacing:-0.01em; }
-  .sub{ color: var(--text-muted); font-size: 14px; }
-  #logout-btn{
-    background: none; border: 1px solid var(--line); color: var(--text-muted);
-    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-    padding: 7px 12px; border-radius: var(--radius); cursor: pointer; white-space: nowrap;
-  }
-  #logout-btn:hover{ color: var(--text); border-color: var(--accent-dim); }
-
-  .tabs{ display:flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
-  .tab-btn{
-    background:none; border:none; color: var(--text-muted);
-    font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
-    padding: 10px 16px; cursor:pointer; border-bottom: 2px solid transparent; margin-bottom:-1px;
-  }
-  .tab-btn.active{ color: var(--accent); border-bottom-color: var(--accent); }
-
-  .filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
-  .filter-btn{
-    font-family:'IBM Plex Mono',monospace; font-size:13px;
-    background: var(--surface); border:1px solid var(--line); color: var(--text-muted);
-    padding:7px 14px; border-radius:var(--radius); cursor:pointer;
-  }
-  .filter-btn:hover{ color: var(--text); border-color: var(--accent-dim); }
-  .filter-btn.active{ color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight:500; }
-
-  .filmstrip{ display:flex; flex-direction:column; }
-  .slide{ border-top:1px solid var(--line); padding:20px 0; }
-  .slide:last-child{ border-bottom:1px solid var(--line); }
-  .slide-top{ display:grid; grid-template-columns: 84px 1fr; gap: 0; }
-  .sprocket{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--text-muted); display:flex; flex-direction:column; gap:4px; padding-top:2px; }
-  .sprocket .cat-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background: var(--accent); vertical-align:middle; }
-  .slide h2{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; line-height:1.4; margin:0 0 8px; }
-  .slide h2 a{ text-decoration:none; }
-  .slide h2 a:hover{ color: var(--accent); }
-  .authors{ font-size:13.5px; color: var(--text-muted); margin-bottom:4px; }
-  .journal-line{ font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--accent-dim); }
-  .journal-line .date{ color: var(--text-muted); }
-  .source-tag{ font-family:'IBM Plex Mono',monospace; font-size:10px; color: var(--text-muted); border:1px solid var(--line); border-radius:2px; padding:1px 5px; margin-left:6px; }
-
-  .review-toggle{
-    margin-top:10px; margin-left:84px;
-    background:none; border:1px solid var(--line); color: var(--accent);
-    font-family:'IBM Plex Mono',monospace; font-size:12px;
-    padding:5px 10px; border-radius:var(--radius); cursor:pointer;
-  }
-  .review-panel{ margin-left:84px; margin-top:12px; background: var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; }
-  .review-item{ padding:8px 0; border-bottom: 1px dashed var(--line); font-size:13.5px; }
-  .review-item:last-child{ border-bottom:none; }
-  .review-item .rname{ color: var(--accent); font-weight:600; margin-right:6px; }
-  .review-item .rtime{ color: var(--text-muted); font-family:'IBM Plex Mono',monospace; font-size:11px; margin-left:6px; }
-  .review-form{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-  .review-form input, .review-form textarea{
-    background: var(--bg); border:1px solid var(--line); border-radius:var(--radius);
-    color: var(--text); padding:8px 10px; font-size:13.5px; resize: vertical;
-  }
-  .review-form button{
-    align-self:flex-start; background: var(--accent); color: var(--bg); border:none;
-    font-weight:600; font-size:13px; padding:7px 14px; border-radius:var(--radius); cursor:pointer;
-  }
-
-  .empty, .error{ font-family:'IBM Plex Mono',monospace; color: var(--text-muted); font-size:13px; padding:40px 0; border-top:1px dashed var(--line); }
-
-  .bw-bar{
-    display:flex; align-items:center; gap:10px; background: var(--surface);
-    border:1px solid var(--line); border-radius: var(--radius); padding:14px 18px; margin-bottom:20px;
-  }
-  .bw-bar label{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; }
-  .bw-bar input{ width:90px; padding:8px 10px; background: var(--bg); border:1px solid var(--line); border-radius:var(--radius); color: var(--text); font-size:15px; }
-  .warning-banner{
-    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color: var(--amber);
-    border:1px solid rgba(232,163,61,0.4); background: rgba(232,163,61,0.08);
-    padding:10px 14px; border-radius:var(--radius); margin-bottom:24px;
-  }
-  .drug-group{ margin-bottom: 32px; }
-  .drug-group-title{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--line); }
-  .drug-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
-  .drug-card{ background: var(--surface); border:1px solid var(--line); border-left-width:4px; border-radius: var(--radius); padding:14px 16px; }
-  .drug-card-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
-  .drug-card-head .name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; }
-  .drug-card-head .badge{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color: var(--text-muted); text-align:right; max-width: 55%; }
-  .field-row{ display:flex; gap:8px; margin:6px 0; }
-  .field{ flex:1; }
-  .field label{ display:block; font-size:10.5px; color: var(--text-muted); font-family:'IBM Plex Mono',monospace; margin-bottom:3px; }
-  .field input{ width:100%; padding:6px 8px; background: var(--bg); border:1px solid var(--line); border-radius:2px; color: var(--text); font-size:13px; }
-  .drug-result{
-    margin-top:10px; font-size:12.5px; background: var(--bg); border:1px solid var(--line);
-    border-radius:2px; padding:8px 10px; line-height:1.6;
-  }
-  .drug-result b{ color: var(--accent); }
-  .drug-result .loading-line{ margin-top:4px; color: var(--text-muted); font-family:'IBM Plex Mono',monospace; font-size:11px; }
-
-  footer{ margin-top:56px; padding-top:20px; border-top:1px solid var(--line); font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--text-muted); }
 
   @media (max-width: 560px){
-    .slide-top{ grid-template-columns: 1fr; }
-    .sprocket{ flex-direction:row; margin-bottom:6px; }
-    .review-toggle, .review-panel{ margin-left:0; }
+    .cri-toolbar{ position: static; }
+    .tab-btn{ padding: 8px 12px; font-size: 13px; }
   }
   @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
 </style>
@@ -275,9 +434,10 @@
 
   <div id="login-screen">
     <div class="login-card">
-      <div class="eyebrow">Internal Access</div>
-      <h1>병원 내부 자료</h1>
-      <p class="login-note">구글 계정으로 로그인하세요. 병원에서 미리 등록한 이메일만 접속할 수 있습니다.</p>
+      <div class="brand-mono">Fatima Clinical Hub</div>
+      <h1>파티마 수의학 아카이브</h1>
+      <hr class="masthead-rule"><hr class="masthead-rule">
+      <p class="login-note">구글 계정으로 로그인하세요.<br>병원에서 미리 등록한 이메일만 접속할 수 있습니다.</p>
       <div class="login-error" id="login-error"></div>
       <button type="button" id="google-login-btn" class="google-btn">
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86-2.36 0-4.35-1.6-5.06-3.74H.9v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.94 10.68A5.4 5.4 0 0 1 3.66 9c0-.58.1-1.15.28-1.68V4.99H.9A9 9 0 0 0 0 9c0 1.45.35 2.83.9 4.01l3.04-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .9 4.99l3.04 2.33C4.65 5.18 6.64 3.58 9 3.58z"/></svg>
@@ -288,56 +448,93 @@
   </div>
 
   <div id="access-denied-screen" class="hidden">
-    <div class="login-card">
-      <div class="eyebrow" style="color:var(--danger)">Access Denied</div>
+    <div class="login-card" style="border-top-color: var(--coral)">
+      <div class="brand-mono" style="color:var(--coral-deep)">Access Denied</div>
       <h1>접근 권한이 없습니다</h1>
+      <hr class="masthead-rule"><hr class="masthead-rule">
       <p class="login-note" id="denied-email"></p>
-      <p class="login-note">이 계정은 병원 접속 허용 목록에 등록되어 있지 않습니다. 관리자(원장님)에게 등록을 요청해주세요.</p>
-      <button type="button" id="denied-logout-btn" class="google-btn" style="background:var(--surface-raised); color:var(--text); border:1px solid var(--line)">다른 계정으로 로그인</button>
+      <p class="login-note">이 계정은 병원 접속 허용 목록에 등록되어 있지 않습니다.<br>관리자(원장님)에게 등록을 요청해주세요.</p>
+      <button type="button" id="denied-logout-btn" class="google-btn secondary">다른 계정으로 로그인</button>
     </div>
   </div>
 
   <div id="app" class="wrap hidden">
-    <header class="app-header">
-      <div>
-        <div class="eyebrow">Internal &middot; PubMed</div>
-        <h1>최신 수의학 논문</h1>
-        <p class="sub">병원 내부용 · 논문 스크랩 + 리뷰 + CRI 계산기</p>
-      </div>
+    <div class="topbar">
+      <span><span class="dot"></span>Internal Only</span>
       <button id="logout-btn">로그아웃</button>
+    </div>
+
+    <header class="masthead">
+      <h1>파티마 수의학 아카이브</h1>
+      <div class="sub-en">Fatima Clinical Hub</div>
+      <div class="rules"></div>
     </header>
 
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="papers">논문 목록</button>
+      <button class="tab-btn active" data-tab="papers">최신 논문</button>
+      <button class="tab-btn" data-tab="study">스터디</button>
       <button class="tab-btn" data-tab="cri">CRI 계산기</button>
+      <button class="tab-btn emerg" data-tab="protocols">응급 프로토콜</button>
       <button class="tab-btn" data-tab="checkup">건강검진</button>
       <button class="tab-btn hidden" data-tab="admin" id="admin-tab-btn">직원 관리</button>
     </nav>
 
     <section id="panel-papers">
+      <h2 class="section-title">최신 수의학 논문</h2>
+      <p class="section-desc">PubMed에서 매일 아침 자동 수집됩니다.</p>
       <nav class="filters" id="filters" aria-label="분과 필터"></nav>
-      <div class="filmstrip" id="filmstrip"><div class="empty">불러오는 중…</div></div>
+      <div class="paper-list" id="papers-list"><div class="empty">불러오는 중…</div></div>
+    </section>
+
+    <section id="panel-study" class="hidden">
+      <h2 class="section-title">스터디 논문</h2>
+      <p class="section-desc">병원 스터디용으로 직접 선정해 등록한 논문입니다. (추가는 GitHub Actions → "Add existing papers by PMID")</p>
+      <nav class="filters" id="study-filters" aria-label="스터디 분과 필터"></nav>
+      <div class="paper-list" id="study-list"><div class="empty">불러오는 중…</div></div>
     </section>
 
     <section id="panel-cri" class="hidden">
-      <div class="bw-bar">
-        <label for="bw-input">체중</label>
+      <h2 class="section-title">CRI 계산기</h2>
+      <p class="section-desc">체중을 입력하면 모든 약물 카드가 동시에 다시 계산됩니다.</p>
+      <div class="cri-toolbar">
+        <label class="bw-label" for="bw-input">환자 체중</label>
         <input type="number" id="bw-input" value="10" min="0" step="0.1">
-        <span style="color:var(--text-muted); font-size:13px;">kg</span>
+        <span class="unit">kg</span>
       </div>
       <div class="warning-banner">⚠ 약물 농도(mg/ml 등)는 병원 보유 약물 라벨에 맞게 직접 수정한 뒤 사용하세요. 이 계산기는 참고용이며, 최종 투여량은 반드시 담당 수의사가 확인해야 합니다.</div>
       <div id="cri-groups"></div>
     </section>
 
+    <section id="panel-protocols" class="hidden">
+      <div class="proto-head">
+        <div>
+          <h2 class="section-title">응급 프로토콜</h2>
+          <p class="section-desc" style="margin-bottom:0">응급 상황 대응 절차. 등록된 직원 누구나 추가·수정할 수 있습니다.</p>
+        </div>
+        <button class="proto-add-btn" id="proto-add-btn">+ 새 프로토콜</button>
+      </div>
+      <form class="proto-form hidden" id="proto-form">
+        <input type="text" id="proto-title" placeholder="프로토콜 제목 (예: CPR — 심폐소생술)" required maxlength="200">
+        <textarea id="proto-body" rows="10" placeholder="내용을 입력하세요. 줄바꿈 그대로 표시됩니다." required maxlength="20000"></textarea>
+        <div class="proto-form-actions">
+          <button type="submit" class="proto-save-btn">저장</button>
+          <button type="button" class="proto-cancel-btn" id="proto-cancel-btn">취소</button>
+        </div>
+      </form>
+      <div class="proto-list" id="proto-list"><div class="empty">불러오는 중…</div></div>
+    </section>
+
     <section id="panel-checkup" class="hidden">
+      <h2 class="section-title">건강검진 결과지</h2>
+      <p class="section-desc">입력 내용은 각자 브라우저에만 유지되며 서버에 저장되지 않습니다.</p>
       <div id="checkup-status" class="empty">불러오는 중…</div>
       <iframe id="checkup-frame" class="hidden"
-        sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin"
-        style="width:100%; min-height:85vh; border:1px solid var(--line); border-radius:var(--radius); background:#fff;"></iframe>
+        sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin"></iframe>
     </section>
 
     <section id="panel-admin" class="hidden">
-      <p class="sub" style="margin-bottom:16px;">여기서 추가한 이메일로 구글 로그인한 직원만 이 사이트에 접속할 수 있습니다.</p>
+      <h2 class="section-title">직원 관리</h2>
+      <p class="section-desc">여기서 추가한 이메일로 구글 로그인한 직원만 이 사이트에 접속할 수 있습니다.</p>
       <form class="admin-add-row" id="admin-add-form">
         <input type="email" id="admin-add-email" placeholder="직원 구글 이메일 (예: name@gmail.com)" required>
         <button type="submit">추가</button>
@@ -346,7 +543,8 @@
     </section>
 
     <footer>
-      데이터 출처: NCBI PubMed E-utilities · 이 페이지는 병원 내부 전용이며 로그인이 필요합니다.
+      <span>FATIMA ANIMAL MEDICAL CENTER · INTERNAL USE ONLY</span>
+      <span>DATA: NCBI PUBMED E-UTILITIES</span>
     </footer>
   </div>
 
@@ -357,7 +555,7 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, doc, query, orderBy, onSnapshot,
-    addDoc, getDoc, setDoc, deleteDoc, serverTimestamp
+    addDoc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   import { firebaseConfig, ADMIN_EMAILS } from './firebase-config.js';
@@ -395,6 +593,8 @@
   document.getElementById('denied-logout-btn').addEventListener('click', () => signOut(auth));
 
   let unsubscribePapers = null;
+  let unsubscribeStudy = null;
+  let unsubscribeProtocols = null;
   let unsubscribeStaffList = null;
 
   function showScreen(name){
@@ -408,6 +608,8 @@
     if (!user) {
       showScreen('login');
       if (unsubscribePapers) { unsubscribePapers(); unsubscribePapers = null; }
+      if (unsubscribeStudy) { unsubscribeStudy(); unsubscribeStudy = null; }
+      if (unsubscribeProtocols) { unsubscribeProtocols(); unsubscribeProtocols = null; }
       if (unsubscribeStaffList) { unsubscribeStaffList(); unsubscribeStaffList = null; }
       checkupLoaded = false;
       const frame = document.getElementById('checkup-frame');
@@ -439,23 +641,21 @@
     showScreen('app');
     document.getElementById('admin-tab-btn').classList.toggle('hidden', !isAdmin);
     if (!unsubscribePapers) unsubscribePapers = subscribeToPapers();
+    if (!unsubscribeStudy) unsubscribeStudy = subscribeToStudy();
+    if (!unsubscribeProtocols) unsubscribeProtocols = subscribeToProtocols();
     if (isAdmin && !unsubscribeStaffList) unsubscribeStaffList = subscribeToStaffList();
   });
 
+  const PANELS = ['papers','study','cri','protocols','checkup','admin'];
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const tab = btn.dataset.tab;
-      document.getElementById('panel-papers').classList.toggle('hidden', tab !== 'papers');
-      document.getElementById('panel-cri').classList.toggle('hidden', tab !== 'cri');
-      document.getElementById('panel-checkup').classList.toggle('hidden', tab !== 'checkup');
-      document.getElementById('panel-admin').classList.toggle('hidden', tab !== 'admin');
+      PANELS.forEach(p => document.getElementById('panel-' + p).classList.toggle('hidden', p !== tab));
       if (tab === 'checkup') loadCheckupTool();
     });
   });
-
-  const state = { papers: [], activeCategory: 'all' };
 
   function escapeHtml(str){
     return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
@@ -472,89 +672,112 @@
     return new Date(year, month, day).getTime();
   }
 
-  function subscribeToPapers(){
-    const papersQuery = query(collection(db, 'papers'), orderBy('fetched_at', 'desc'));
+  /* ============================================================
+     논문 목록 2종 (최신 = papers 컬렉션 / 스터디 = study_papers 컬렉션)
+     동일한 렌더링 로직을 컬렉션 이름만 바꿔 재사용한다.
+  ============================================================ */
+  const paperSections = {
+    papers: {
+      collectionName: 'papers',
+      listElId: 'papers-list',
+      filtersElId: 'filters',
+      state: { papers: [], activeCategory: 'all' },
+      emptyMsg: '해당 분과의 논문이 아직 없습니다.',
+    },
+    study: {
+      collectionName: 'study_papers',
+      listElId: 'study-list',
+      filtersElId: 'study-filters',
+      state: { papers: [], activeCategory: 'all' },
+      emptyMsg: '아직 등록된 스터디 논문이 없습니다. Actions 탭에서 PMID로 추가하세요.',
+    },
+  };
+
+  function subscribeToPapers(){ return subscribePaperSection(paperSections.papers); }
+  function subscribeToStudy(){ return subscribePaperSection(paperSections.study); }
+
+  function subscribePaperSection(section){
+    const papersQuery = query(collection(db, section.collectionName), orderBy('fetched_at', 'desc'));
     return onSnapshot(papersQuery, (snapshot) => {
-      state.papers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      state.papers.sort((a, b) => parsePubDateKey(b.pubdate) - parsePubDateKey(a.pubdate));
-      buildFilters();
-      renderPapers();
+      section.state.papers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      section.state.papers.sort((a, b) => parsePubDateKey(b.pubdate) - parsePubDateKey(a.pubdate));
+      buildFilters(section);
+      renderPapers(section);
     }, (err) => {
-      document.getElementById('filmstrip').innerHTML =
+      document.getElementById(section.listElId).innerHTML =
         '<div class="error">불러오기 실패: ' + escapeHtml(err.message) + '</div>';
     });
   }
 
-  function buildFilters(){
-    const nav = document.getElementById('filters');
-    const categories = [...new Set(state.papers.map(p => p.category).filter(Boolean))];
+  function buildFilters(section){
+    const nav = document.getElementById(section.filtersElId);
+    const categories = [...new Set(section.state.papers.map(p => p.category).filter(Boolean))];
     const all = ['all', ...categories];
     nav.innerHTML = all.map(cat => `
-      <button class="filter-btn ${cat === state.activeCategory ? 'active' : ''}" data-cat="${escapeHtml(cat)}">
+      <button class="filter-btn ${cat === section.state.activeCategory ? 'active' : ''}" data-cat="${escapeHtml(cat)}">
         ${cat === 'all' ? '전체' : escapeHtml(cat)}
       </button>
     `).join('');
     nav.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        state.activeCategory = btn.dataset.cat;
+        section.state.activeCategory = btn.dataset.cat;
         nav.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
-        renderPapers();
+        renderPapers(section);
       });
     });
   }
 
-  function renderPapers(){
-    const filmstrip = document.getElementById('filmstrip');
-    const list = state.activeCategory === 'all'
-      ? state.papers
-      : state.papers.filter(p => p.category === state.activeCategory);
+  function renderPapers(section){
+    const listEl = document.getElementById(section.listElId);
+    const list = section.state.activeCategory === 'all'
+      ? section.state.papers
+      : section.state.papers.filter(p => p.category === section.state.activeCategory);
 
     if(list.length === 0){
-      filmstrip.innerHTML = '<div class="empty">해당 분과의 논문이 아직 없습니다.</div>';
+      listEl.innerHTML = '<div class="empty">' + escapeHtml(section.emptyMsg) + '</div>';
       return;
     }
 
-    filmstrip.innerHTML = list.map(p => `
-      <article class="slide" data-pmid="${escapeHtml(p.id)}">
-        <div class="slide-top">
-          <div class="sprocket">
-            <span><span class="cat-dot"></span>${escapeHtml(p.category || '')}</span>
-            <span>PMID ${escapeHtml(p.id)}</span>
-          </div>
-          <div class="slide-body">
-            <h2><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a></h2>
-            <div class="authors">${escapeHtml((p.authors || []).join(', '))}${(p.authors||[]).length ? ' 외' : ''}</div>
-            <div class="journal-line">${escapeHtml(p.journal || '')} <span class="date">· ${escapeHtml(p.pubdate || '')}</span>${p.source === 'manual' ? '<span class="source-tag">수동 추가</span>' : ''}</div>
-          </div>
+    listEl.innerHTML = list.map(p => `
+      <article class="paper" data-pmid="${escapeHtml(p.id)}">
+        <div class="paper-meta">
+          ${p.category ? '<span class="cat">' + escapeHtml(p.category) + '</span>' : ''}
+          <span>PMID ${escapeHtml(p.id)}</span>
         </div>
+        <h2><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a></h2>
+        <div class="authors">${escapeHtml((p.authors || []).join(', '))}${(p.authors||[]).length ? ' 외' : ''}</div>
+        <div class="journal-line"><span class="jname">${escapeHtml(p.journal || '')}</span> · ${escapeHtml(p.pubdate || '')}</div>
         <button class="review-toggle" data-pmid="${escapeHtml(p.id)}">리뷰 보기 / 남기기</button>
         <div class="review-panel hidden" data-panel-for="${escapeHtml(p.id)}"></div>
       </article>
     `).join('');
 
-    filmstrip.querySelectorAll('.review-toggle').forEach(btn => {
-      btn.addEventListener('click', () => toggleReviewPanel(btn.dataset.pmid));
+    listEl.querySelectorAll('.review-toggle').forEach(btn => {
+      btn.addEventListener('click', () => toggleReviewPanel(section, btn.dataset.pmid));
     });
   }
 
-  const reviewUnsubscribers = new Map();
+  const reviewUnsubscribers = new Map(); // key: collectionName + '/' + pmid
 
-  function toggleReviewPanel(pmid){
-    const panel = document.querySelector('.review-panel[data-panel-for="' + pmid + '"]');
+  function toggleReviewPanel(section, pmid){
+    const listEl = document.getElementById(section.listElId);
+    const panel = listEl.querySelector('.review-panel[data-panel-for="' + pmid + '"]');
     if(!panel) return;
     const isHidden = panel.classList.contains('hidden');
     panel.classList.toggle('hidden', !isHidden);
-    if(isHidden && !reviewUnsubscribers.has(pmid)){
-      const commentsQuery = query(collection(db, 'papers', pmid, 'comments'), orderBy('created_at', 'asc'));
+    const key = section.collectionName + '/' + pmid;
+    if(isHidden && !reviewUnsubscribers.has(key)){
+      const commentsQuery = query(collection(db, section.collectionName, pmid, 'comments'), orderBy('created_at', 'asc'));
       const unsub = onSnapshot(commentsQuery, (snapshot) => {
-        renderReviewPanel(pmid, snapshot.docs.map(d => d.data()));
+        renderReviewPanel(section, pmid, snapshot.docs.map(d => d.data()));
       });
-      reviewUnsubscribers.set(pmid, unsub);
+      reviewUnsubscribers.set(key, unsub);
     }
   }
 
-  function renderReviewPanel(pmid, comments){
-    const panel = document.querySelector('.review-panel[data-panel-for="' + pmid + '"]');
+  function renderReviewPanel(section, pmid, comments){
+    const listEl = document.getElementById(section.listElId);
+    const panel = listEl.querySelector('.review-panel[data-panel-for="' + pmid + '"]');
     if(!panel) return;
     const list = comments.length
       ? comments.map(c => `
@@ -563,7 +786,7 @@
             <span class="rtime">${c.created_at?.toDate ? c.created_at.toDate().toLocaleString('ko-KR') : ''}</span>
           </div>
         `).join('')
-      : '<div class="review-item" style="color:var(--text-muted)">아직 리뷰가 없습니다.</div>';
+      : '<div class="review-item" style="color:var(--ink-muted)">아직 리뷰가 없습니다.</div>';
 
     panel.innerHTML = `
       ${list}
@@ -582,7 +805,7 @@
       if(!name || !text) return;
       form.querySelector('button').disabled = true;
       try{
-        await addDoc(collection(db, 'papers', pmid, 'comments'), {
+        await addDoc(collection(db, section.collectionName, pmid, 'comments'), {
           name, text, created_at: serverTimestamp()
         });
         form.text.value = '';
@@ -594,7 +817,113 @@
     });
   }
 
-  // ---------------- 건강검진 도구 (Firestore에 저장된 HTML을 iframe으로 렌더링) ----------------
+  /* ============================================================
+     응급 프로토콜 (protocols 컬렉션)
+     등록된 직원 누구나 추가/수정/삭제 가능.
+  ============================================================ */
+  const protoState = { protocols: [], editingId: null };
+  const protoForm = document.getElementById('proto-form');
+  const protoTitle = document.getElementById('proto-title');
+  const protoBody = document.getElementById('proto-body');
+
+  function subscribeToProtocols(){
+    const q = query(collection(db, 'protocols'), orderBy('updated_at', 'desc'));
+    return onSnapshot(q, (snapshot) => {
+      protoState.protocols = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderProtocols();
+    }, (err) => {
+      document.getElementById('proto-list').innerHTML =
+        '<div class="error">불러오기 실패: ' + escapeHtml(err.message) + '</div>';
+    });
+  }
+
+  function openProtoForm(protocol){
+    protoState.editingId = protocol ? protocol.id : null;
+    protoTitle.value = protocol ? protocol.title : '';
+    protoBody.value = protocol ? protocol.body : '';
+    protoForm.classList.remove('hidden');
+    protoTitle.focus();
+  }
+
+  function closeProtoForm(){
+    protoState.editingId = null;
+    protoForm.classList.add('hidden');
+    protoTitle.value = '';
+    protoBody.value = '';
+  }
+
+  document.getElementById('proto-add-btn').addEventListener('click', () => openProtoForm(null));
+  document.getElementById('proto-cancel-btn').addEventListener('click', closeProtoForm);
+
+  protoForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = protoTitle.value.trim();
+    const body = protoBody.value.trim();
+    if(!title || !body) return;
+    const saveBtn = protoForm.querySelector('.proto-save-btn');
+    saveBtn.disabled = true;
+    const data = {
+      title, body,
+      updated_at: serverTimestamp(),
+      updated_by: auth.currentUser?.email || '',
+    };
+    try{
+      if(protoState.editingId){
+        await updateDoc(doc(db, 'protocols', protoState.editingId), data);
+      } else {
+        await addDoc(collection(db, 'protocols'), data);
+      }
+      closeProtoForm();
+    } catch(err){
+      alert('저장 실패: ' + err.message);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  function renderProtocols(){
+    const listEl = document.getElementById('proto-list');
+    if(protoState.protocols.length === 0){
+      listEl.innerHTML = '<div class="empty">아직 등록된 프로토콜이 없습니다. "+ 새 프로토콜"로 첫 문서를 만들어보세요.</div>';
+      return;
+    }
+    listEl.innerHTML = protoState.protocols.map(p => `
+      <article class="proto-card" data-id="${escapeHtml(p.id)}">
+        <div class="proto-card-top">
+          <h3>${escapeHtml(p.title)}</h3>
+          <div class="proto-actions">
+            <button type="button" data-action="edit">수정</button>
+            <button type="button" data-action="delete" class="del">삭제</button>
+          </div>
+        </div>
+        <div class="proto-body">${escapeHtml(p.body)}</div>
+        <div class="proto-meta">최종 수정: ${escapeHtml(p.updated_by || '')} · ${p.updated_at?.toDate ? p.updated_at.toDate().toLocaleString('ko-KR') : ''}</div>
+      </article>
+    `).join('');
+
+    listEl.querySelectorAll('.proto-card').forEach(card => {
+      const id = card.dataset.id;
+      const protocol = protoState.protocols.find(p => p.id === id);
+      card.querySelector('[data-action="edit"]').addEventListener('click', () => {
+        openProtoForm(protocol);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      card.querySelector('[data-action="delete"]').addEventListener('click', async (e) => {
+        if(!confirm('"' + protocol.title + '" 프로토콜을 삭제할까요? 되돌릴 수 없습니다.')) return;
+        e.target.disabled = true;
+        try{
+          await deleteDoc(doc(db, 'protocols', id));
+        } catch(err){
+          alert('삭제 실패: ' + err.message);
+          e.target.disabled = false;
+        }
+      });
+    });
+  }
+
+  /* ============================================================
+     건강검진 도구 (Firestore에 저장된 HTML을 iframe으로 렌더링)
+  ============================================================ */
   let checkupLoaded = false;
 
   async function loadCheckupTool(){
@@ -616,7 +945,9 @@
     }
   }
 
-  // ---------------- 직원 관리(허용 이메일) ----------------
+  /* ============================================================
+     직원 관리 (허용 이메일)
+  ============================================================ */
   function subscribeToStaffList(){
     const staffQuery = query(collection(db, 'allowlist'), orderBy('addedAt', 'desc'));
     return onSnapshot(staffQuery, (snapshot) => {
@@ -630,7 +961,7 @@
   function renderStaffList(emails){
     const listEl = document.getElementById('staff-list');
     if(emails.length === 0){
-      listEl.innerHTML = '<div class="empty">아직 추가된 직원 이메일이 없습니다.</div>';
+      listEl.innerHTML = '<div class="empty" style="border:none">아직 추가된 직원 이메일이 없습니다.</div>';
       return;
     }
     listEl.innerHTML = emails.map(email => `
@@ -674,6 +1005,9 @@
     }
   });
 
+  /* ============================================================
+     CRI 계산기
+  ============================================================ */
   function renderCRI(){
     const bwInput = document.getElementById('bw-input');
     const container = document.getElementById('cri-groups');
@@ -682,7 +1016,10 @@
       const bw = parseFloat(bwInput.value) || 0;
       container.innerHTML = DRUG_GROUPS.map(group => `
         <div class="drug-group">
-          <div class="drug-group-title" style="color:${group.accent}">${escapeHtml(group.label)}</div>
+          <div class="drug-group-title" style="color:${group.accent}">
+            ${escapeHtml(group.label)}
+            <span class="count">${group.drugs.length} DRUGS</span>
+          </div>
           <div class="drug-grid">
             ${group.drugs.map(drug => drugCardHtml(drug, group.accent)).join('')}
           </div>
@@ -706,7 +1043,7 @@
   function drugCardHtml(drug, accent){
     if(drug.type === 'bicarbonate'){
       return `
-        <div class="drug-card" data-drug="${drug.id}" style="border-left-color:${accent}">
+        <div class="drug-card" data-drug="${drug.id}" style="border-top:3px solid ${accent}">
           <div class="drug-card-head">
             <span class="name">${escapeHtml(drug.name)}</span>
             <span class="badge">${escapeHtml(drug.badge)}</span>
@@ -720,7 +1057,7 @@
     }
     if(drug.type === 'targetConc'){
       return `
-        <div class="drug-card" data-drug="${drug.id}" style="border-left-color:${accent}">
+        <div class="drug-card" data-drug="${drug.id}" style="border-top:3px solid ${accent}">
           <div class="drug-card-head">
             <span class="name">${escapeHtml(drug.name)}</span>
             <span class="badge">${escapeHtml(drug.badge)}</span>
@@ -737,7 +1074,7 @@
         </div>`;
     }
     return `
-      <div class="drug-card" data-drug="${drug.id}" style="border-left-color:${accent}">
+      <div class="drug-card" data-drug="${drug.id}" style="border-top:3px solid ${accent}">
         <div class="drug-card-head">
           <span class="name">${escapeHtml(drug.name)}</span>
           <span class="badge">${escapeHtml(drug.badge)}</span>
