@@ -14,7 +14,7 @@ export const DRUG_GROUPS = [
   {
     id: "cardio",
     label: "심혈관계 (Cardiovascular)",
-    accent: "#5ec8d8",
+    accent: "#B5544A",
     drugs: [
       {
         id: "dobutamine",
@@ -82,7 +82,7 @@ export const DRUG_GROUPS = [
   {
     id: "diuretics",
     label: "이뇨제 / 전해질 (Diuretics / Electrolytes)",
-    accent: "#4caf7d",
+    accent: "#2E7FA8",
     drugs: [
       {
         id: "furosemide",
@@ -134,7 +134,7 @@ export const DRUG_GROUPS = [
   {
     id: "sedation",
     label: "진정 / 항경련 (Sedation / Anticonvulsants)",
-    accent: "#9b7fd4",
+    accent: "#6E5FA8",
     drugs: [
       {
         id: "midazolam",
@@ -165,7 +165,7 @@ export const DRUG_GROUPS = [
   {
     id: "antiarrhythmics",
     label: "항부정맥제 (Antiarrhythmics)",
-    accent: "#c9812f",
+    accent: "#B8862F",
     drugs: [
       {
         id: "lidocaine-dog",
@@ -198,7 +198,7 @@ export const DRUG_GROUPS = [
   {
     id: "others",
     label: "기타 (Others)",
-    accent: "#8a8f98",
+    accent: "#6B7A78",
     drugs: [
       {
         id: "metoclopramide",
