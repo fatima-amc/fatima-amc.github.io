@@ -44,6 +44,34 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // 스터디 논문 (PMID 수동 등록). 본문 쓰기는 GitHub Actions(Admin SDK)만,
+    // 읽기와 리뷰(댓글)는 허용된 직원만.
+    match /study_papers/{paperId} {
+      allow read: if isAllowed();
+      allow write: if false;
+      match /comments/{commentId} {
+        allow read: if isAllowed();
+        allow create: if isAllowed()
+                       && request.resource.data.keys().hasAll(['name', 'text', 'created_at'])
+                       && request.resource.data.text is string
+                       && request.resource.data.text.size() > 0
+                       && request.resource.data.text.size() < 2000;
+        allow update, delete: if false;
+      }
+    }
+    // 응급 프로토콜. 허용된 직원 누구나 추가/수정/삭제할 수 있다.
+    match /protocols/{protocolId} {
+      allow read: if isAllowed();
+      allow create, update: if isAllowed()
+                       && request.resource.data.keys().hasAll(['title', 'body', 'updated_at', 'updated_by'])
+                       && request.resource.data.title is string
+                       && request.resource.data.title.size() > 0
+                       && request.resource.data.title.size() < 200
+                       && request.resource.data.body is string
+                       && request.resource.data.body.size() > 0
+                       && request.resource.data.body.size() < 20000;
+      allow delete: if isAllowed();
+    }
     match /papers/{paperId} {
       allow read: if isAllowed();
       // 논문 본문은 GitHub Actions(서비스 계정, Admin SDK)만 쓸 수 있도록 막아둔다.
