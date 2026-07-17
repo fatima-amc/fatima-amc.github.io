@@ -209,8 +209,53 @@
   .journal-line{ font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--ink-muted); }
   .journal-line .jname{ color: var(--mint-deep); }
 
+  /* ---- 논문 한줄 요약 ---- */
+  .summary-box{ margin-top: 12px; }
+  .summary-add{
+    background: var(--mint-tint); border:1px dashed var(--mint); color: var(--mint-deep);
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    padding:6px 12px; border-radius: var(--radius); cursor:pointer;
+  }
+  .summary-add:hover{ background: #DFF0ED; }
+  .summary-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em;
+    text-transform: uppercase; color: var(--mint-deep); margin-bottom: 4px;
+  }
+  .summary-text{
+    background: var(--mint-tint); border-left: 3px solid var(--mint);
+    border-radius: 2px; padding: 10px 13px;
+    font-size: 13.5px; line-height: 1.7; color: var(--ink);
+    white-space: pre-wrap;
+  }
+  .summary-foot{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top: 6px;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color: var(--ink-muted);
+  }
+  .summary-edit{
+    background:none; border:1px solid var(--line); color: var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    padding:3px 9px; border-radius: var(--radius); cursor:pointer;
+  }
+  .summary-edit:hover{ border-color: var(--mint); color: var(--mint-deep); }
+  .summary-input{
+    width:100%; background: var(--paper); border:1px solid var(--line);
+    border-radius: var(--radius); color: var(--ink); padding: 9px 11px;
+    font-size: 13.5px; font-family:'IBM Plex Sans KR',sans-serif; resize: vertical;
+  }
+  .summary-editor-actions{ display:flex; gap:8px; margin-top:8px; }
+  .summary-save{
+    background: var(--mint-deep); color:#fff; border:none; font-weight:600;
+    font-size:12.5px; padding:7px 15px; border-radius: var(--radius); cursor:pointer;
+  }
+  .summary-save:hover{ background: var(--mint); }
+  .summary-cancel{
+    background:none; border:1px solid var(--line); color: var(--ink-soft);
+    font-size:12.5px; padding:7px 13px; border-radius: var(--radius); cursor:pointer;
+  }
+  .paper-actions{ margin-top: 12px; }
+
   .review-toggle{
-    margin-top:12px;
     background:none; border:1px solid var(--line); color: var(--ink-soft);
     font-family:'IBM Plex Mono',monospace; font-size:11.5px;
     padding:5px 12px; border-radius: var(--radius); cursor:pointer;
@@ -828,10 +873,16 @@
         <h2><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a></h2>
         <div class="authors">${escapeHtml((p.authors || []).join(', '))}${(p.authors||[]).length ? ' 외' : ''}</div>
         <div class="journal-line"><span class="jname">${escapeHtml(p.journal || '')}</span> · ${escapeHtml(p.pubdate || '')}</div>
-        <button class="review-toggle" data-pmid="${escapeHtml(p.id)}">리뷰 보기 / 남기기</button>
+        <div class="summary-box" data-summary-for="${escapeHtml(p.id)}"></div>
+        <div class="paper-actions">
+          <button class="review-toggle" data-pmid="${escapeHtml(p.id)}">리뷰 보기 / 남기기</button>
+        </div>
         <div class="review-panel hidden" data-panel-for="${escapeHtml(p.id)}"></div>
       </article>
     `).join('');
+
+    // 각 논문의 한줄 요약 구독
+    list.forEach(p => subscribeSummary(section, p.id));
 
     listEl.querySelectorAll('.review-toggle').forEach(btn => {
       btn.addEventListener('click', () => toggleReviewPanel(section, btn.dataset.pmid));
@@ -839,6 +890,77 @@
   }
 
   const reviewUnsubscribers = new Map(); // key: collectionName + '/' + pmid
+
+  /* ---- 논문 한줄 요약 (summaries 하위 컬렉션, 논문당 1개, 허용 직원 누구나 편집) ---- */
+  const summaryUnsubscribers = new Map(); // key: collectionName + '/' + pmid
+
+  function subscribeSummary(section, pmid){
+    const key = section.collectionName + '/' + pmid;
+    if(summaryUnsubscribers.has(key)) return; // 이미 구독 중
+    const ref = doc(db, section.collectionName, pmid, 'meta', 'summary');
+    const unsub = onSnapshot(ref, (snap) => {
+      renderSummary(section, pmid, snap.exists() ? snap.data() : null);
+    }, () => {});
+    summaryUnsubscribers.set(key, unsub);
+  }
+
+  function renderSummary(section, pmid, data){
+    const listEl = document.getElementById(section.listElId);
+    const box = listEl.querySelector('.summary-box[data-summary-for="' + pmid + '"]');
+    if(!box) return;
+    const text = data?.text?.trim();
+    if(text){
+      box.innerHTML = `
+        <div class="summary-label">한줄 요약</div>
+        <div class="summary-text">${escapeHtml(text)}</div>
+        <div class="summary-foot">
+          <span>${escapeHtml(data.by || '')}${data.at?.toDate ? ' · ' + data.at.toDate().toLocaleDateString('ko-KR') : ''}</span>
+          <button class="summary-edit" data-pmid="${escapeHtml(pmid)}">수정</button>
+        </div>`;
+    } else {
+      box.innerHTML = `<button class="summary-add" data-pmid="${escapeHtml(pmid)}">+ 한글 요약 추가</button>`;
+    }
+    const editBtn = box.querySelector('.summary-edit, .summary-add');
+    if(editBtn){
+      editBtn.addEventListener('click', () => openSummaryEditor(section, pmid, text || ''));
+    }
+  }
+
+  function openSummaryEditor(section, pmid, current){
+    const listEl = document.getElementById(section.listElId);
+    const box = listEl.querySelector('.summary-box[data-summary-for="' + pmid + '"]');
+    if(!box) return;
+    box.innerHTML = `
+      <div class="summary-label">한줄 요약 작성</div>
+      <textarea class="summary-input" rows="3" maxlength="1000" placeholder="이 논문의 핵심을 한글로 간략히 적어주세요.">${escapeHtml(current)}</textarea>
+      <div class="summary-editor-actions">
+        <button class="summary-save" data-pmid="${escapeHtml(pmid)}">저장</button>
+        <button class="summary-cancel" data-pmid="${escapeHtml(pmid)}">취소</button>
+      </div>`;
+    const ta = box.querySelector('.summary-input');
+    ta.focus();
+    box.querySelector('.summary-save').addEventListener('click', async () => {
+      const value = ta.value.trim();
+      const saveBtn = box.querySelector('.summary-save');
+      saveBtn.disabled = true;
+      try{
+        await setDoc(doc(db, section.collectionName, pmid, 'meta', 'summary'), {
+          text: value,
+          by: auth.currentUser?.email || '',
+          at: serverTimestamp(),
+        });
+        // onSnapshot이 자동으로 다시 렌더
+      } catch(err){
+        alert('저장 실패: ' + err.message);
+        saveBtn.disabled = false;
+      }
+    });
+    box.querySelector('.summary-cancel').addEventListener('click', () => {
+      // 현재 저장된 값으로 되돌리기: 재구독이 최신값 렌더링하므로 강제 재렌더
+      renderSummary(section, pmid, current ? { text: current } : null);
+    });
+  }
+
 
   function toggleReviewPanel(section, pmid){
     const listEl = document.getElementById(section.listElId);
