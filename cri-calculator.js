@@ -56,26 +56,13 @@ export const DRUG_GROUPS = [
         id: "nitroprusside",
         name: "Nitroprusside",
         type: "perMin_mg",
-        badge: "1~10 μg/kg/min · 차광 필수",
+        badge: "1~10 μg/kg/min · CRI만(볼루스 금지) · 차광 필수 · 최대 24시간",
         defaultConc: 25,
         concLabel: "mg/ml",
         defaultDose: 1,
         doseLabel: "용량 (μg/kg/min)",
         defaultVolume: 100,
         defaultRate: 5,
-      },
-      {
-        id: "diltiazem",
-        name: "Diltiazem",
-        type: "perMin_mg",
-        badge: "CRI: 1~8 μg/kg/min · Loading: 0.125~0.25 mg/kg IV",
-        defaultConc: 5,
-        concLabel: "mg/ml",
-        defaultDose: 2,
-        doseLabel: "용량 (μg/kg/min)",
-        defaultVolume: 50,
-        defaultRate: 5,
-        loading: { low: 0.125, high: 0.25, unit: "mg/kg" },
       },
     ],
   },
@@ -97,37 +84,14 @@ export const DRUG_GROUPS = [
         defaultRate: 5,
       },
       {
-        id: "kcl",
-        name: "KCl",
-        type: "targetConc",
-        badge: "최대 0.5 mEq/kg/hr 절대 금지!",
-        defaultConc: 2,
-        concLabel: "mEq/ml",
-        defaultDose: 20, // 목표 농도 (mEq/L)
-        doseLabel: "목표 농도 (mEq/L)",
-        defaultVolume: 500,
-        defaultRate: 10,
-      },
-      {
         id: "bicarbonate",
         name: "Bicarbonate (NaHCO3)",
         type: "bicarbonate",
-        badge: "요구량 1/4~1/2 · 1~4시간 공급",
+        badge: "본원 기준: pH 7.1 이하일 때만 · 요구량 1/4~1/2를 1~4시간 공급",
         defaultConc: 1,
         concLabel: "mEq/ml",
+        defaultHCO3: 10,
         defaultBE: -8,
-      },
-      {
-        id: "calcium",
-        name: "10% Calcium Gluconate",
-        type: "perHr_mg",
-        badge: "2.5~3.5 mg/kg/hr",
-        defaultConc: 9.3,
-        concLabel: "mg/ml",
-        defaultDose: 3,
-        doseLabel: "용량 (mg/kg/hr)",
-        defaultVolume: 50,
-        defaultRate: 5,
       },
     ],
   },
@@ -163,35 +127,22 @@ export const DRUG_GROUPS = [
     ],
   },
   {
-    id: "antiarrhythmics",
-    label: "항부정맥제 (Antiarrhythmics)",
-    accent: "#B8862F",
+    id: "hemostasis",
+    label: "지혈 (Hemostasis)",
+    accent: "#8A3D52",
     drugs: [
       {
-        id: "lidocaine-dog",
-        name: "Lidocaine (개)",
-        type: "perMin_mg",
-        badge: "CRI: 25~100 μg/kg/min · Loading: 1~2 mg/kg IV (1~4분)",
-        defaultConc: 20,
-        concLabel: "mg/ml",
-        defaultDose: 50,
-        doseLabel: "용량 (μg/kg/min)",
-        defaultVolume: 100,
-        defaultRate: 10,
-        loading: { low: 1, high: 2, unit: "mg/kg" },
-      },
-      {
-        id: "lidocaine-cat",
-        name: "Lidocaine (고양이)",
-        type: "perMin_mg",
-        badge: "CRI: 10~20 μg/kg/min · Loading: 0.25~0.5 mg/kg IV (1~4분)",
-        defaultConc: 20,
+        id: "txa",
+        name: "Tranexamic acid (개)",
+        type: "perHr_mg",
+        badge: "CRI: 10 mg/kg/hr × 3시간 · Loading: 10 mg/kg 느린 IV 볼루스(구토 주의)",
+        defaultConc: 100,
         concLabel: "mg/ml",
         defaultDose: 10,
-        doseLabel: "용량 (μg/kg/min)",
+        doseLabel: "용량 (mg/kg/hr)",
         defaultVolume: 50,
         defaultRate: 5,
-        loading: { low: 0.25, high: 0.5, unit: "mg/kg" },
+        loading: { low: 10, high: 10, unit: "mg/kg" },
       },
     ],
   },
@@ -255,18 +206,6 @@ export const DRUG_GROUPS = [
         defaultVolume: 50,
         defaultRate: 5,
       },
-      {
-        id: "hydrocortisone",
-        name: "Hydrocortisone",
-        type: "perHr_mg",
-        badge: "CRI: 0.08~0.15 mg/kg/hr",
-        defaultConc: 100,
-        concLabel: "mg/ml",
-        defaultDose: 0.1,
-        doseLabel: "용량 (mg/kg/hr)",
-        defaultVolume: 50,
-        defaultRate: 5,
-      },
     ],
   },
 ];
@@ -296,7 +235,12 @@ export function computeCRI(drug, inputs) {
     const totalHours = volume / rate;
     const totalMg = dose * bw * totalHours;
     const drugVolume = totalMg / conc;
-    return { drugVolume, diluentVolume: volume - drugVolume, rate };
+    return {
+      drugVolume,
+      diluentVolume: volume - drugVolume,
+      rate,
+      loading: computeLoading(drug, conc, bw),
+    };
   }
 
   if (drug.type === "perMin_units") {
@@ -316,12 +260,20 @@ export function computeCRI(drug, inputs) {
   }
 
   if (drug.type === "bicarbonate") {
-    const totalMeq = 0.3 * bw * Math.abs(be);
-    const fullVolume = totalMeq / conc;
+    // 본원 기준: 몸무게 × 0.5 × (15 − 측정 HCO3⁻)  (pH 7.1 이하일 때만)
+    const fatimaMeq = 0.5 * bw * Math.max(0, 15 - (inputs.hco3 ?? 0));
+    const fatimaVolume = fatimaMeq / conc;
+    // 문헌 표준(참고): BE × 체중 × 0.3
+    const litMeq = 0.3 * bw * Math.abs(be);
+    const litVolume = litMeq / conc;
     return {
-      fullVolume,
-      recommendedLow: fullVolume * 0.25,
-      recommendedHigh: fullVolume * 0.5,
+      fatimaMeq,
+      fatimaVolume,
+      litMeq,
+      litVolume,
+      // 실제 투여: 요구량의 1/4~1/2 (본원 기준)
+      recommendedLow: fatimaVolume * 0.25,
+      recommendedHigh: fatimaVolume * 0.5,
     };
   }
 
