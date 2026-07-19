@@ -253,7 +253,13 @@
     background:none; border:1px solid var(--line); color: var(--ink-soft);
     font-size:12.5px; padding:7px 13px; border-radius: var(--radius); cursor:pointer;
   }
-  .paper-actions{ margin-top: 12px; }
+  .paper-actions{ margin-top: 12px; display:flex; gap:8px; align-items:center; }
+  .paper-delete{
+    background:none; border:1px solid var(--line); color: var(--coral-deep);
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    padding:5px 12px; border-radius: var(--radius); cursor:pointer;
+  }
+  .paper-delete:hover{ border-color: var(--coral); background: var(--coral-tint); }
 
   .review-toggle{
     background:none; border:1px solid var(--line); color: var(--ink-soft);
@@ -735,6 +741,7 @@
   let unsubscribeStudy = null;
   let unsubscribeProtocols = null;
   let unsubscribeStaffList = null;
+  let currentUserIsAdmin = false;
 
   function showScreen(name){
     // name: 'login' | 'denied' | 'app'
@@ -746,6 +753,7 @@
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       showScreen('login');
+      currentUserIsAdmin = false;
       if (unsubscribePapers) { unsubscribePapers(); unsubscribePapers = null; }
       if (unsubscribeStudy) { unsubscribeStudy(); unsubscribeStudy = null; }
       if (unsubscribeProtocols) { unsubscribeProtocols(); unsubscribeProtocols = null; }
@@ -760,6 +768,7 @@
     }
 
     const isAdmin = ADMIN_EMAILS.includes(user.email);
+    currentUserIsAdmin = isAdmin;
     let allowed = isAdmin;
 
     if (!allowed) {
@@ -881,7 +890,7 @@
       <article class="paper" data-pmid="${escapeHtml(p.id)}">
         <div class="paper-meta">
           ${p.category ? '<span class="cat">' + escapeHtml(p.category) + '</span>' : ''}
-          <span>PMID ${escapeHtml(p.id)}</span>
+          <span>${p.source === 'doi' ? 'DOI ' + escapeHtml(p.doi || '') : 'PMID ' + escapeHtml(p.id)}</span>
         </div>
         <h2><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a></h2>
         <div class="authors">${escapeHtml((p.authors || []).join(', '))}${(p.authors||[]).length ? ' 외' : ''}</div>
@@ -889,6 +898,7 @@
         <div class="summary-box" data-summary-for="${escapeHtml(p.id)}"></div>
         <div class="paper-actions">
           <button class="review-toggle" data-pmid="${escapeHtml(p.id)}">리뷰 보기 / 남기기</button>
+          ${currentUserIsAdmin ? '<button class="paper-delete" data-pmid="' + escapeHtml(p.id) + '" title="논문 삭제">삭제</button>' : ''}
         </div>
         <div class="review-panel hidden" data-panel-for="${escapeHtml(p.id)}"></div>
       </article>
@@ -900,6 +910,22 @@
     listEl.querySelectorAll('.review-toggle').forEach(btn => {
       btn.addEventListener('click', () => toggleReviewPanel(section, btn.dataset.pmid));
     });
+
+    listEl.querySelectorAll('.paper-delete').forEach(btn => {
+      btn.addEventListener('click', () => deletePaper(section, btn.dataset.pmid));
+    });
+  }
+
+  async function deletePaper(section, pmid){
+    const paper = section.state.papers.find(p => p.id === pmid);
+    const title = paper ? paper.title : pmid;
+    if(!confirm('"' + title + '"\n\n이 논문을 삭제할까요? 되돌릴 수 없습니다.\n(요약과 리뷰도 함께 사라집니다.)')) return;
+    try{
+      await deleteDoc(doc(db, section.collectionName, pmid));
+      // onSnapshot이 목록을 자동 갱신함
+    } catch(err){
+      alert('삭제 실패: ' + err.message);
+    }
   }
 
   const reviewUnsubscribers = new Map(); // key: collectionName + '/' + pmid
