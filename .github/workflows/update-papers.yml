@@ -4,7 +4,16 @@ on:
   schedule:
     # 매일 UTC 21:00 = 한국시간(KST) 06:00
     - cron: "0 21 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      recent_days:
+        description: "최근 며칠 이내 논문을 수집할지 (기본 60)"
+        required: false
+        default: "60"
+      per_category_limit:
+        description: "분과당 최대 편수 (기본 15)"
+        required: false
+        default: "15"
 
 jobs:
   fetch:
@@ -22,4 +31,6 @@ jobs:
       - name: 논문 수집 및 Firestore 저장
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          RECENT_DAYS: ${{ github.event.inputs.recent_days || '60' }}
+          PER_CATEGORY_LIMIT: ${{ github.event.inputs.per_category_limit || '15' }}
         run: python scripts/fetch_papers.py
