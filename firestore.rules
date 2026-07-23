@@ -16,7 +16,7 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null &&
         request.auth.token.email in [
-          'director@example.com' // 원장님 본인 구글 이메일로 교체하세요 (firebase-config.js와 동일하게)
+          'changhee2505@gmail.com'
         ];
     }
 
@@ -48,7 +48,9 @@ service cloud.firestore {
     // 읽기와 리뷰(댓글)는 허용된 직원만.
     match /study_papers/{paperId} {
       allow read: if isAllowed();
-      allow write: if false;
+      // 논문 추가/수정은 GitHub Actions(Admin SDK)만. 삭제는 관리자(원장)만 사이트에서 가능.
+      allow create, update: if false;
+      allow delete: if isAdmin();
       match /comments/{commentId} {
         allow read: if isAllowed();
         allow create: if isAllowed()
@@ -57,6 +59,13 @@ service cloud.firestore {
                        && request.resource.data.text.size() > 0
                        && request.resource.data.text.size() < 2000;
         allow update, delete: if false;
+      }
+      // 한줄 요약(논문당 1개). 허용된 직원 누구나 작성/수정 가능.
+      match /meta/summary {
+        allow read: if isAllowed();
+        allow write: if isAllowed()
+                       && request.resource.data.text is string
+                       && request.resource.data.text.size() < 1000;
       }
     }
     // 응급 프로토콜. 허용된 직원 누구나 추가/수정/삭제할 수 있다.
@@ -74,8 +83,9 @@ service cloud.firestore {
     }
     match /papers/{paperId} {
       allow read: if isAllowed();
-      // 논문 본문은 GitHub Actions(서비스 계정, Admin SDK)만 쓸 수 있도록 막아둔다.
-      allow write: if false;
+      // 논문 추가/수정은 GitHub Actions(서비스 계정, Admin SDK)만. 삭제는 관리자(원장)만 사이트에서 가능.
+      allow create, update: if false;
+      allow delete: if isAdmin();
 
       match /comments/{commentId} {
         allow read: if isAllowed();
@@ -85,6 +95,13 @@ service cloud.firestore {
                        && request.resource.data.text.size() > 0
                        && request.resource.data.text.size() < 2000;
         allow update, delete: if false;
+      }
+      // 한줄 요약(논문당 1개). 허용된 직원 누구나 작성/수정 가능.
+      match /meta/summary {
+        allow read: if isAllowed();
+        allow write: if isAllowed()
+                       && request.resource.data.text is string
+                       && request.resource.data.text.size() < 1000;
       }
     }
   }
