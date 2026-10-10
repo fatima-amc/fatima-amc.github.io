@@ -7,21 +7,18 @@ PubMed에서 최신 논문을 자동 수집하고, 병원 내부 직원만 **구
 
 ```
 .
-├── index.html                      # 로그인 + 논문목록/리뷰 + CRI 계산기 + 건강검진 도구 + 직원 관리 화면
+├── index.html                      # 로그인 + 논문목록/리뷰 + CRI 계산기 + 건강검진 도구 + 치과 차트 + 직원 관리 화면
 ├── firebase-config.js              # Firebase 프로젝트 설정값 + 관리자 이메일 (직접 채워야 함)
 ├── cri-calculator.js               # CRI 계산 로직 + 약물 목록 설정
 ├── firestore.rules                 # Firestore 보안 규칙(허용된 이메일만 접근 가능)
-├── tools/
-│   └── checkup.html                # 건강검진 결과지 작성 도구 (통째로 Firestore에 동기화됨)
 ├── scripts/
 │   ├── fetch_papers.py             # PubMed 자동 수집 → Firestore 저장
 │   ├── add_existing_papers.py      # 기존 논문을 PMID로 일괄 추가
-│   ├── upload_tool_html.py         # tools/*.html → Firestore 동기화
+│   ├── upload_tool_html.py         # (예전 방식) tools/*.html → Firestore 동기화
 │   └── requirements.txt
 └── .github/workflows/
     ├── update-papers.yml           # 매일 자동 수집
     ├── add-papers.yml              # 기존 논문 추가용 수동 실행
-    └── sync-tools.yml              # tools/*.html 변경 시 자동 동기화
 ```
 
 ## 접근 제어 방식
@@ -115,19 +112,18 @@ PMID는 https://pubmed.ncbi.nlm.nih.gov/ 에서 논문 검색 후 상세 페이�
 Loading dose가 있는 약물은 `loading: { low, high, unit: 'mg/kg' }`를 추가하면
 자동으로 계산되어 표시됩니다.
 
-### 건강검진 도구 (checkup.html) 업데이트하기
-"건강검진" 탭은 `tools/checkup.html` 파일 내용을 통째로 Firestore에 저장해뒀다가,
-로그인한 직원에게만 iframe으로 보여주는 방식입니다 (그 안의 입력 내용은 그 사람
-브라우저 안에서만 유지되고 서버에 저장되지 않습니다 — 인쇄/PDF 저장은 각자 컴퓨터에서).
+### 내부 도구(건강검진 결과지 · 치과 차트) 업데이트하기
+"건강검진"과 "치과 차트" 탭은 HTML 파일 내용을 통째로 Firestore `tools/checkup`,
+`tools/dental` 문서에 저장해뒀다가, 로그인한 직원에게만 iframe으로 보여주는 방식입니다
+(그 안의 입력 내용은 각자 브라우저 안에서만 유지되고 서버에 저장되지 않습니다).
 
-도구 자체를 수정하고 싶으면:
-1. `tools/checkup.html` 파일을 새 버전으로 교체
-2. 저장소에 push (또는 Actions 탭 → "Sync internal tools to Firestore" → Run workflow)
-3. 몇 초 내로 사이트의 "건강검진" 탭에 새 버전이 반영됩니다 (직원들은 새로고침하면 최신 버전을 봄)
+원본 HTML은 공개 저장소인 GitHub에 두지 않습니다. 새 버전으로 바꾸려면:
+1. 관리자 계정으로 로그인 → "직원 관리" 탭 → "내부 도구 올리기"
+2. 도구 종류(건강검진 결과지 / 치과 차트)를 고르고 HTML 파일을 선택해 "올리기"
+3. 해당 탭을 다시 열면 새 버전이 적용됩니다 (다른 직원은 새로고침)
 
-같은 방식으로 `tools/` 폴더에 html 파일을 더 추가하면 자동으로 Firestore에
-동기화되지만, 화면에 새 탭으로 보이게 하려면 `index.html`에 탭 버튼과
-로딩 로직을 추가로 연결해줘야 합니다.
+이 기능은 `firestore.rules`의 `tools` 규칙(관리자만 쓰기 허용)이 Firebase 콘솔에
+게시돼 있어야 동작합니다.
 
 ## 카카오톡 링크로 열었을 때 로그인이 안 되는 경우
 

@@ -37,11 +37,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // 내부 도구 HTML (건강검진 결과지 등). GitHub Actions(Admin SDK)만 쓸 수 있고,
-    // 로그인+허용된 직원만 읽을 수 있다.
+    // 내부 도구 HTML (건강검진 결과지, 치과 차트). 관리자(원장)만 사이트의
+    // '직원 관리 > 내부 도구 올리기'에서 올릴 수 있고, 로그인+허용된 직원만 읽을 수 있다.
+    // 원본 HTML을 GitHub(공개 저장소)에 두지 않기 위한 방식.
     match /tools/{toolId} {
       allow read: if isAllowed();
-      allow write: if false;
+      allow write: if isAdmin()
+                    && toolId in ['checkup', 'dental']
+                    && request.resource.data.html is string
+                    && request.resource.data.html.size() > 0
+                    && request.resource.data.html.size() < 1000000;
     }
 
     // 스터디 논문 (PMID 수동 등록). 본문 쓰기는 GitHub Actions(Admin SDK)만,
