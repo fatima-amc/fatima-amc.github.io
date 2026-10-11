@@ -791,6 +791,7 @@
       if (unsubscribeProtocols) { unsubscribeProtocols(); unsubscribeProtocols = null; }
       if (unsubscribeStaffList) { unsubscribeStaffList(); unsubscribeStaffList = null; }
       Object.keys(TOOL_TABS).forEach(resetTool);
+      delete window.__fatimaDental; // 치과 차트 ↔ 건강검진 공유 표시
       return;
     }
 
