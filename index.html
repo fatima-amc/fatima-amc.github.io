@@ -493,21 +493,21 @@
 
   /* ============ 건강검진 ============ */
   /* 건강검진 탭만 1000px 컨테이너를 벗어나 화면 전체 폭을 쓴다 */
-  #panel-checkup:not(.hidden), #panel-dental:not(.hidden), #panel-soap:not(.hidden){
+  #panel-checkup:not(.hidden), #panel-dental:not(.hidden), #panel-soap:not(.hidden), #panel-inpatient:not(.hidden){
     width: 96vw;
     max-width: 1600px;
     position: relative;
     left: 50%;
     transform: translateX(-50%);
   }
-  #checkup-frame, #dental-frame, #soap-frame{
+  #checkup-frame, #dental-frame, #soap-frame, #inpatient-frame{
     width:100%; min-height:88vh;
     border:1px solid var(--line); border-radius:var(--radius); background:#fff;
   }
 
   @media (max-width: 1040px){
     /* 화면이 컨테이너보다 그리 넓지 않으면 무리하게 늘리지 않는다 */
-    #panel-checkup:not(.hidden), #panel-dental:not(.hidden), #panel-soap:not(.hidden){ width: 100%; left: 0; transform: none; }
+    #panel-checkup:not(.hidden), #panel-dental:not(.hidden), #panel-soap:not(.hidden), #panel-inpatient:not(.hidden){ width: 100%; left: 0; transform: none; }
   }
 
   /* ============ 직원 관리 ============ */
@@ -610,6 +610,7 @@
       <button class="tab-btn" data-tab="checkup">건강검진</button>
       <button class="tab-btn" data-tab="dental">치과 차트</button>
       <button class="tab-btn" data-tab="soap">SOAP 도우미</button>
+      <button class="tab-btn" data-tab="inpatient">입원 차트</button>
       <button class="tab-btn hidden" data-tab="admin" id="admin-tab-btn">직원 관리</button>
     </nav>
 
@@ -704,6 +705,14 @@
         sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin"></iframe>
     </section>
 
+    <section id="panel-inpatient" class="hidden">
+      <h2 class="section-title">입원 차트</h2>
+      <p class="section-desc">입원 환자 차트는 병원 서버(Firestore)에 저장되어 로그인한 직원 누구나 이어서 볼 수 있습니다.</p>
+      <div id="inpatient-status" class="empty">불러오는 중…</div>
+      <iframe id="inpatient-frame" class="hidden"
+        sandbox="allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-downloads"></iframe>
+    </section>
+
     <section id="panel-admin" class="hidden">
       <h2 class="section-title">직원 관리</h2>
       <p class="section-desc">여기서 추가한 이메일로 구글 로그인한 직원만 이 사이트에 접속할 수 있습니다.</p>
@@ -721,6 +730,7 @@
             <option value="checkup">건강검진 결과지</option>
             <option value="dental">치과 차트</option>
             <option value="soap">SOAP 도우미</option>
+            <option value="inpatient">입원 차트</option>
           </select>
           <input type="file" id="tool-upload-file" accept=".html,text/html" required>
           <button type="submit">올리기</button>
@@ -742,7 +752,7 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, doc, query, orderBy, onSnapshot,
-    addDoc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp
+    addDoc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   import { firebaseConfig, ADMIN_EMAILS } from './firebase-config.js';
@@ -832,7 +842,7 @@
     if (isAdmin && !unsubscribeStaffList) unsubscribeStaffList = subscribeToStaffList();
   });
 
-  const PANELS = ['papers','study','cri','protocols','checkup','dental','soap','admin'];
+  const PANELS = ['papers','study','cri','protocols','checkup','dental','soap','inpatient','admin'];
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1205,7 +1215,7 @@
      건강검진 도구 (Firestore에 저장된 HTML을 iframe으로 렌더링)
   ============================================================ */
   // 탭 이름 → Firestore tools/{문서} (건강검진, 치과 차트)
-  var TOOL_TABS = { checkup: '건강검진 도구', dental: '치과 차트', soap: 'SOAP 도우미' };
+  var TOOL_TABS = { checkup: '건강검진 도구', dental: '치과 차트', soap: 'SOAP 도우미', inpatient: '입원 차트' };
   var toolLoaded = {};
 
   function resetTool(id){
@@ -1264,6 +1274,28 @@
       btn.disabled = false;
     }
   });
+
+  /* ============================================================
+     내부 도구(iframe)용 저장소 — 허용된 컬렉션만 읽고 쓴다 (현재: 입원 차트)
+     도구 쪽 객체는 다른 창(realm)에서 왔으므로 JSON으로 복사해서 Firestore에 넘긴다.
+  ============================================================ */
+  const STORE_ROOTS = ['inpatients'];
+  function storePath(path){
+    const parts = String(path).split('/').filter(Boolean);
+    if (!STORE_ROOTS.includes(parts[0])) throw new Error('허용되지 않은 저장 위치입니다');
+    return parts;
+  }
+  window.fatimaStore = {
+    me: () => auth.currentUser?.email || '',
+    async get(path){ const s = await getDoc(doc(db, ...storePath(path))); return s.exists() ? JSON.parse(JSON.stringify(s.data())) : null; },
+    async set(path, data){
+      const clean = JSON.parse(JSON.stringify(data || {}));
+      delete clean.updated_at; delete clean.updated_by;
+      await setDoc(doc(db, ...storePath(path)), { ...clean, updated_at: serverTimestamp(), updated_by: auth.currentUser?.email || '' });
+    },
+    async list(path){ const s = await getDocs(collection(db, ...storePath(path))); return s.docs.map(d => ({ id: d.id, ...JSON.parse(JSON.stringify(d.data())) })); },
+    async del(path){ await deleteDoc(doc(db, ...storePath(path))); }
+  };
 
   /* ============================================================
      직원 관리 (허용 이메일)

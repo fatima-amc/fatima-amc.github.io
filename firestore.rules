@@ -43,7 +43,7 @@ service cloud.firestore {
     match /tools/{toolId} {
       allow read: if isAllowed();
       allow write: if isAdmin()
-                    && toolId in ['checkup', 'dental', 'soap']
+                    && toolId in ['checkup', 'dental', 'soap', 'inpatient']
                     && request.resource.data.html is string
                     && request.resource.data.html.size() > 0
                     && request.resource.data.html.size() < 1000000;
@@ -71,6 +71,21 @@ service cloud.firestore {
         allow write: if isAllowed()
                        && request.resource.data.text is string
                        && request.resource.data.text.size() < 1000;
+      }
+    }
+    // 입원 차트. 허용된 직원 누구나 읽고 쓸 수 있고, 삭제는 관리자만.
+    // 환자 정보 문서 + 날짜별(21시 기준) 차트 하위 문서.
+    match /inpatients/{pid} {
+      allow read: if isAllowed();
+      allow create, update: if isAllowed()
+                       && request.resource.data.name is string
+                       && request.resource.data.name.size() > 0
+                       && request.resource.data.name.size() < 100;
+      allow delete: if isAdmin();
+      match /days/{day} {
+        allow read: if isAllowed();
+        allow create, update: if isAllowed() && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+        allow delete: if isAdmin();
       }
     }
     // 응급 프로토콜. 허용된 직원 누구나 추가/수정/삭제할 수 있다.
