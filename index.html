@@ -609,7 +609,7 @@
       <button class="tab-btn emerg" data-tab="protocols">응급 프로토콜</button>
       <button class="tab-btn" data-tab="checkup">건강검진</button>
       <button class="tab-btn" data-tab="dental">치과 차트</button>
-      <button class="tab-btn" data-tab="soap">SOAP 도우미</button>
+      <button class="tab-btn" data-tab="soap">진료 차트</button>
       <button class="tab-btn" data-tab="inpatient">입원 차트</button>
       <button class="tab-btn hidden" data-tab="admin" id="admin-tab-btn">직원 관리</button>
     </nav>
@@ -698,7 +698,7 @@
     </section>
 
     <section id="panel-soap" class="hidden">
-      <h2 class="section-title">SOAP 도우미</h2>
+      <h2 class="section-title">진료 차트</h2>
       <p class="section-desc">인투벳 검사결과 엑셀로 S/O를 정리해 복사합니다. 입력 내용은 서버에 저장되지 않습니다.</p>
       <div id="soap-status" class="empty">불러오는 중…</div>
       <iframe id="soap-frame" class="hidden"
@@ -729,7 +729,7 @@
           <select id="tool-upload-id" aria-label="도구 종류">
             <option value="checkup">건강검진 결과지</option>
             <option value="dental">치과 차트</option>
-            <option value="soap">SOAP 도우미</option>
+            <option value="soap">진료 차트</option>
             <option value="inpatient">입원 차트</option>
           </select>
           <input type="file" id="tool-upload-file" accept=".html,text/html" required>
@@ -1215,7 +1215,7 @@
      건강검진 도구 (Firestore에 저장된 HTML을 iframe으로 렌더링)
   ============================================================ */
   // 탭 이름 → Firestore tools/{문서} (건강검진, 치과 차트)
-  var TOOL_TABS = { checkup: '건강검진 도구', dental: '치과 차트', soap: 'SOAP 도우미', inpatient: '입원 차트' };
+  var TOOL_TABS = { checkup: '건강검진 도구', dental: '치과 차트', soap: '진료 차트', inpatient: '입원 차트' };
   var toolLoaded = {};
 
   function resetTool(id){
